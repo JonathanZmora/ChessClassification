@@ -1,0 +1,17 @@
+attrs
+autopep8
+cattrs
+certifi
+charset-normalizer
+chess
+Cython
+fastjsonschema
+idna
+numpy
+pycodestyle
+python-chess
+requests
+typing_extensions
+urllib3
+zstandard
+opencv-python
