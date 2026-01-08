@@ -20,6 +20,7 @@ from bpy_extras.object_utils import world_to_camera_view
 # Rotate the offset vector
 from mathutils import Matrix
 import bpy_extras
+
 # ==========================
 # CONFIG
 # ==========================
@@ -29,7 +30,7 @@ DESIRED_ANGLE_DEGREES = 25
 LENS = 26
 RES = 1024
 SAMPLES = 128
-OUT_DIR = "C:\\Users\\liorv\\Downloads\\dl_project_data\\renders"    
+OUT_DIR = "./renders"    
 
 
 def get_board_corners_2d(scene, camera, board_info):
@@ -97,6 +98,57 @@ def get_board_info():
         'center': center,
         'scale_factor': scale_factor,
     }
+
+
+def enable_gpu():
+    """
+    Forces Blender to use the GPU for rendering.
+    Supports OptiX (NVIDIA RTX) and CUDA.
+    """
+    print("\n" + "="*70)
+    print("ENABLING GPU")
+    print("="*70)
+    
+    try:
+        # Access the Cycles preferences
+        cycles_prefs = bpy.context.preferences.addons['cycles'].preferences
+        
+        # 1. Refresh devices to detect hardware
+        # (Necessary because in background mode, UI doesn't trigger this)
+        cycles_prefs.refresh_devices()
+        
+        # 2. Set the global compute device type
+        # Try OptiX first (Fastest for RTX cards), then CUDA
+        device_type = 'CUDA'
+        
+        # Check if OptiX is available
+        for device in cycles_prefs.devices:
+            if device.type == 'OPTIX':
+                device_type = 'OPTIX'
+                break
+        
+        cycles_prefs.compute_device_type = device_type
+        print(f"  Compute Device Type: {device_type}")
+        
+        # 3. Enable the actual devices
+        enabled_count = 0
+        for device in cycles_prefs.devices:
+            if device.type == device_type:
+                device.use = True
+                print(f"  Enabled: {device.name}")
+                enabled_count += 1
+            else:
+                device.use = False
+        
+        # 4. Force the scene to use these settings
+        bpy.context.scene.cycles.device = 'GPU'
+        
+        if enabled_count == 0:
+            print("  Warning: No compatible GPU devices found!")
+        
+    except Exception as e:
+        print(f"  Error enabling GPU: {e}")
+
 
 def position_to_square(pos, board_info):
     """Convert 3D position to chess square (e.g., 'e2')"""
@@ -384,6 +436,7 @@ def main():
     SAMPLES = args.samples
     # OUT_DIR = "./renders"
 
+    enable_gpu()
     
     # Get board info
     board_info = get_board_info()
