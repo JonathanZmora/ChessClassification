@@ -35,39 +35,38 @@ OUT_DIR = "./renders"
 
 def get_board_corners_2d(scene, camera, board_info):
     """
-    Returns the (x, y) pixel coordinates of the 'Outer frame' top corners.
+    Returns the (x, y) pixel coordinates of the 4 board corners 
+    for the current camera view.
     """
-    # Get the actual frame object
-    frame = bpy.data.objects.get("Outer frame")
-    if not frame:
-        print("Error: 'Outer frame' object not found!")
-        return []
-
-    # Get the 8 corners of the bounding box in World Space
-    # (matrix_world accounts for location, rotation, and scale)
-    corners_3d = [frame.matrix_world @ Vector(corner) for corner in frame.bound_box]
-   
-    # The frame is a 3D box (8 corners). We only want the TOP face (4 corners).
-    # We assume the board is lying flat-ish, so we grab the 4 points with the highest Z values.
-    # Sort by Z (descending) and take the first 4
-    corners_3d.sort(key=lambda p: p.z, reverse=True)
-    top_corners_3d = corners_3d[:4]
-
-    # Now project these 4 3D points to 2D pixels
+    # 1. Get the 4 corners of the board in 3D space
+    # We use the plane_min/max we already calculated in get_board_info
+    p_min = board_info['plane_min']
+    p_max = board_info['plane_max']
+    z = p_max.z  # Use the top surface height
+    
+    # Define the 4 corners in 3D (Order: Bottom-Left, Bottom-Right, Top-Right, Top-Left)
+    corners_3d = [
+        Vector((p_min.x, p_min.y, z)), # Corner 1
+        Vector((p_max.x, p_min.y, z)), # Corner 2
+        Vector((p_max.x, p_max.y, z)), # Corner 3
+        Vector((p_min.x, p_max.y, z)), # Corner 4
+    ]
+    
     pixels = []
     res_x = scene.render.resolution_x
     res_y = scene.render.resolution_y
-   
-    for corner in top_corners_3d:
-        co_2d = bpy_extras.object_utils.world_to_camera_view(scene, camera, corner)
-       
-        # Convert normalized (0..1) to pixel coordinates
-        # Blender (0,0) is Bottom-Left. OpenCV/Images (0,0) is Top-Left.
+    
+    for corner in corners_3d:
+        # Project 3D point to 2D normalized coordinates (0.0 to 1.0)
+        co_2d = world_to_camera_view(scene, camera, corner)
+        
+        # Blender's (0,0) is Bottom-Left. OpenCV's (0,0) is Top-Left.
+        # We must flip the Y coordinate.
         pixel_x = co_2d.x * res_x
-        pixel_y = (1.0 - co_2d.y) * res_y
-       
+        pixel_y = (1.0 - co_2d.y) * res_y 
+        
         pixels.append([pixel_x, pixel_y])
-       
+        
     return pixels
 
 
@@ -424,8 +423,8 @@ def main():
     
     parser = argparse.ArgumentParser()
     parser.add_argument('--fen', type=str, default="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR")
-    parser.add_argument('--resolution', type=int, default=800)
-    parser.add_argument('--samples', type=int, default=128)
+    parser.add_argument('--resolution', type=int, default=1600)
+    parser.add_argument('--samples', type=int, default=256)
     parser.add_argument('--view', type=str, default='black', choices=['white', 'black'],
                         help='Render from white or black perspective')
     

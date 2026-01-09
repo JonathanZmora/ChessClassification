@@ -118,7 +118,7 @@ def main() -> int:
     parser.add_argument("--input", required=True, help="Input CSV path (e.g. all_games.csv)")
     parser.add_argument("--out", default="synthetic_index.csv", help="Output index CSV name")
     parser.add_argument("--view", default="black")
-    parser.add_argument("--resolution", type=int, default=2400)
+    parser.add_argument("--resolution", type=int, default=1600)
     parser.add_argument("--skip-existing", action="store_true", help="Skip frame if already in output CSV")
     args = parser.parse_args()
 
