@@ -44,22 +44,26 @@ class FenGenerator:
             current_fen_full: str = board.fen()
 
             fen_move_code, *_ = current_fen_full.split(" ")
-            real_move_index: int = move_index + 1
+            real_move_index: str = f"{move_index + 1:05}"
 
             writer.writerow([game_number, real_move_index, real_move_index, fen_move_code])
 
     @staticmethod
     def fen_dataset_from_pgn(pgn_path: pathType, result_dir_path: pathType, result_file_name: pathType,
-                             games_limit: int = 100, base_game_index: int = 0) -> None:
+                             first_game: int = 0, games_limit: int = 100, base_game_index: int = 0) -> None:
         """
         extract FEN codes from PGN and writes them to a file
 
         Params:
             pgn_path (pathType): path to a PGN file
             result_dir_path (pathType): destination directory where generate files to
+            first_game (int): how many games to skip
             game_limit (int): maximal number of games would be extracted (if negative it means 'all'), default: 100
             base_game_index (int): the base reference game, default: 0
         """
+        if first_game < 0:
+            raise ValueError("first game cannot be negative, provided:", first_game)
+
         pgn_path: Path = Path(pgn_path)
         result_dir_path = Path(result_dir_path)
         result_file_name = Path(result_file_name)
@@ -69,6 +73,7 @@ class FenGenerator:
         try:
             with open(pgn_path, newline="\n") as pgn:
                 current_game_index: int = 0
+                total_games_read: int = 0
                 pgn_name: str = pgn_path.stem
 
                 print("[INFO] extracting FENs from all games in provided PGN...")
@@ -82,6 +87,10 @@ class FenGenerator:
                         next_game: chess.pgn.Game = FenGenerator.__read_next_chess_game_from_pgn(pgn)
                         if next_game is None:
                             break
+
+                        if total_games_read < first_game:
+                            total_games_read += 1
+                            continue
 
                         print(f"[INFO] extracting game: {current_game_index + 1}")
                         FenGenerator.__write_single_game_to_file(next_game, result_fens,
@@ -101,7 +110,8 @@ if __name__ == "__main__":
             r"C:\Users\user\Downloads\Abdusattorov\Abdusattorov.pgn",
             "",
             "Abdusattorov_games.csv",
-            100,
+            0,
+            10,
             8
         )
     except TypeError as e:
