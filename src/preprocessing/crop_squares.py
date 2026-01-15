@@ -8,9 +8,7 @@ from pathlib import Path
 import shutil
 from tqdm import tqdm
 
-# Mapping for readable class names
-# We use FEN characters as folder names for simplicity
-# P=White Pawn, p=Black Pawn, etc.
+
 CLASS_MAP = {
     'P': 'white_pawn',   'p': 'black_pawn',
     'N': 'white_knight', 'n': 'black_knight',
@@ -20,6 +18,7 @@ CLASS_MAP = {
     'K': 'white_king',   'k': 'black_king',
     'empty': 'empty'
 }
+
 
 def parse_fen_to_grid(fen):
     """
@@ -42,6 +41,7 @@ def parse_fen_to_grid(fen):
                 row.append(char)
         grid.append(row)
     return grid
+
 
 def create_dataset(index_csv, output_dir, padding_pct=0.0):
     count_writes = 0
@@ -131,6 +131,7 @@ def create_dataset(index_csv, output_dir, padding_pct=0.0):
                     count_writes += 1
 
     print(f"Done. Dataset created with {count_writes} images.")
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
