@@ -2,64 +2,30 @@ import cv2
 import torch
 import random
 import pandas as pd
+from tqdm import tqdm
 from pathlib import Path
 from PIL import Image
 from torchvision import transforms
-from torch.utils.data import Dataset
+from torch.utils.data import Dataset, DataLoader
 from src.utils.fen_utils import fen_to_labels
 from src.constants import CLASS_MAP, EMPTY_LIMIT
 
 
 class ChessSquareDataset(Dataset):
-    def __init__(self, root_dir, transform=None):
-        """
-        Args:
-            root_dir (str): Path to the dataset folder.
-                            Expects subfolders like 'P', 'n', 'empty'.
-            transform (callable, optional): Transform to be applied on a sample.
-        """
-        self.root_dir = Path(root_dir)
-        self.transform = transform
-        self.samples = []
-
-        # Load all image paths and labels
-        self._load_dataset()
-
-    
-    def _load_dataset(self):
-        for class_name, label_idx in CLASS_MAP.items():
-            class_dir = self.root_dir / class_name
-            if not class_dir.exists():
-                continue
-            
-            # Get all image files
-            files = list(class_dir.glob("*.png")) + list(class_dir.glob("*.jpg"))
-            
-            if class_name == 'empty' and EMPTY_LIMIT:
-                # Randomly sample distinct files
-                print(f"Undersampling 'empty' from {len(files)} to {EMPTY_LIMIT}...")
-                files = random.sample(files, EMPTY_LIMIT)
-
-            for img_path in files:
-                self.samples.append((str(img_path), label_idx))
-
-        print(f"Loaded {len(self.samples)} samples from {self.root_dir}")
-
-    
-    def __len__(self):
-        return len(self.samples)
-
-    
-    def __getitem__(self, idx):
-        img_path, label = self.samples[idx]
+    def __init__(self, board_dataset):
+        self.squares = []
+        self.labels = []
         
-        # Load Image (Convert to RGB to handle color randomization)
-        image = Image.open(img_path).convert('RGB')
+        print("Pre-loading dataset...")
+        for imgs, lbls in tqdm(board_dataset):
+            self.squares.extend([img.detach().clone() for img in imgs])
+            self.labels.extend(lbls.tolist())
 
-        if self.transform:
-            image = self.transform(image)
+    def __len__(self):
+        return len(self.labels)
 
-        return image, label
+    def __getitem__(self, idx):
+        return self.squares[idx], self.labels[idx]
     
 
 class ChessBoardDataset(Dataset):

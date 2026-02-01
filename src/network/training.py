@@ -64,9 +64,13 @@ def train(
             total_samples = 0
             
             for inputs, labels in dataloader:
-                B, S, C, H, W = inputs.shape
-                inputs = inputs.view(B*S, C, H, W).to(device)  # [B, 64, 3, 64, 64] -> [B * 64, 3, 64, 64]
-                labels = labels.view(-1).to(device)            # [B, 64] -> [B * 64]
+                if inputs.dim() == 5:
+                    B, S, C, H, W = inputs.shape
+                    inputs = inputs.view(B*S, C, H, W).to(device)  # [B, 64, 3, 64, 64] -> [B * 64, 3, 64, 64]
+                    labels = labels.view(-1).to(device)            # [B, 64] -> [B * 64]
+                else:
+                    inputs = inputs.to(device)  
+                    labels = labels.to(device)           
 
                 optimizer.zero_grad()
 

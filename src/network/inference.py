@@ -59,3 +59,25 @@ def predict_board(image: np.ndarray) -> torch.Tensor:
         preds = torch.argmax(outputs, dim=1)
         
     return preds.view(8, 8).cpu().to(torch.int64)
+
+
+def predict(model, dataloader, device='cpu'):
+    model.eval()
+    all_preds = []
+    all_labels = []
+
+    with torch.no_grad():
+        for inputs, labels in dataloader:
+            B, S, C, H, W = inputs.shape
+            inputs = inputs.view(B * S, C, H, W).to(device)
+            labels = labels.to(device).view(-1)
+            
+            outputs = model(inputs) 
+            preds = torch.argmax(outputs, dim=1)
+
+            labels = labels.view(-1)
+            
+            all_preds.extend(preds.cpu().numpy())
+            all_labels.extend(labels.cpu().numpy())
+            
+    return all_preds, all_labels
