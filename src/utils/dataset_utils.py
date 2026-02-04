@@ -71,6 +71,7 @@ def build_transforms(mean, std, mode='train', config=None):
     
     transform_list = []
     transform_list.append(transforms.Resize((64, 64)))
+    transform_list.append(transforms.ToTensor())
     
     # TRAIN ONLY TRANSFORMS
     if mode == 'train':
@@ -83,23 +84,24 @@ def build_transforms(mean, std, mode='train', config=None):
 
         # Photometric (Color/Lighting)
         if config.get('jitter', False):
+            brightness, hue = config['jitter']
             transform_list.append(
-                transforms.ColorJitter(brightness=0.3, contrast=0.3, saturation=0.3, hue=0.05)
+                transforms.ColorJitter(brightness=0.5, hue=0.2)
             )
 
         # Blur
         if config.get('blur', False):
+            kernel_size, sigma = config['blur']
             transform_list.append(
-                transforms.RandomApply([transforms.GaussianBlur(3, sigma=(0.1, 2.0))], p=0.2)
+                transforms.GaussianBlur(kernel_size, sigma)
             )
 
         # Noise 
         if config.get('noise', False):
             transform_list.append(
-                transforms.RandomApply([lambda x: x + torch.randn_like(x) * 0.05], p=0.2)
+                transforms.Lambda(lambda x: torch.clamp(x + 0.01 * torch.randn_like(x), 0, 1))
             )
 
-    transform_list.append(transforms.ToTensor())
     transform_list.append(transforms.Normalize(mean=mean, std=std))
     
     return transforms.Compose(transform_list)
