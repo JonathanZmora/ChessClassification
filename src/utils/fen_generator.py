@@ -51,7 +51,7 @@ if __name__ == "__main__":
 
         for game_index in tqdm(range(num_of_fens), desc="Generating FENs", unit="fen"):
             for attempt in range(__MAX_RETRIES_PER_ITEM):
-                random_board: chess.Board = random_legal_chess_board(max_plies=200)
+                random_board: chess.Board = random_legal_chess_board(max_plies=80)
                 board_key: str = random_board.epd()
 
                 if board_key not in seen:
