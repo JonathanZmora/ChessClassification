@@ -36,7 +36,7 @@ if __name__ == "__main__":
     argc: int = len(argv)
 
     if argc != 4:
-        print("Usage: python3 fen_generator.py <dst_file_name> <game_number> <num_of_fens>")
+        print(f"Usage: python3 {argv[0]} <dst_file_name> <game_number> <num_of_fens>", file=sys.stderr)
         sys.exit(1)
 
     dst_file_name: str = argv[1]
