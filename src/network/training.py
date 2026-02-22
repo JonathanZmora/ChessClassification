@@ -16,22 +16,27 @@ def train(
     save_path='best_model.pth'
 ):
     """
-    Generic training loop.
-    
+    Executes the training loop for a PyTorch model.
+    Handles both standard 4D image batches and 5D sequence batches 
+    (flattening them during the forward pass), tracks loss and accuracy
+    metrics and automatically saves the model achieving the highest validation accuracy.
+
     Args:
-        model: The model to train.
-        train_loader: DataLoader for training data.
-        val_loader: DataLoader for validation data.
-        criterion: Loss function (e.g., nn.CrossEntropyLoss, nn.MSELoss).
-        optimizer: Optimizer (e.g., optim.Adam, optim.SGD).
-        scheduler: Learning rate scheduler (optional).
-        num_epochs: Number of epochs to train.
-        device: 'cuda' or 'cpu'.
-        save_path: Path to save the best model weights.
-        
+        model (nn.Module): The PyTorch model to train.
+        train_loader (DataLoader): DataLoader providing the training dataset.
+        val_loader (DataLoader): DataLoader providing the validation dataset.
+        criterion (callable): Loss function (e.g., nn.CrossEntropyLoss).
+        optimizer (torch.optim.Optimizer): Optimization algorithm.
+        scheduler (lr_scheduler, optional): Learning rate scheduler. Defaults to None.
+        num_epochs (int, optional): Number of training epochs. Defaults to 25.
+        device (str, optional): Target computation device. Defaults to 'cpu'.
+        save_path (str, optional): File path to save the best model object. Defaults to 'best_model.pth'.
+
     Returns:
-        model: The model loaded with the best weights.
-        history: Dictionary containing loss and accuracy history.
+        tuple[nn.Module, dict]: A tuple containing:
+            - model: The PyTorch model loaded with the best validation weights.
+            - history: A dictionary tracking 'train_loss', 'train_acc', 'val_loss', and 'val_acc' 
+                       metrics across all epochs.
     """
     since = time.time()
     
@@ -66,8 +71,8 @@ def train(
             for inputs, labels in dataloader:
                 if inputs.dim() == 5:
                     B, S, C, H, W = inputs.shape
-                    inputs = inputs.view(B*S, C, H, W).to(device)  # [B, 64, 3, 64, 64] -> [B * 64, 3, 64, 64]
-                    labels = labels.view(-1).to(device)            # [B, 64] -> [B * 64]
+                    inputs = inputs.view(B * S, C, H, W).to(device)  
+                    labels = labels.view(-1).to(device)            
                 else:
                     inputs = inputs.to(device)  
                     labels = labels.to(device)           

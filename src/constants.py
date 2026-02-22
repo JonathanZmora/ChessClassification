@@ -1,21 +1,25 @@
 
+# Mapping of class indices to FEN string characters
 IDX_TO_FEN = {
     0: 'P', 1: 'R', 2: 'N', 3: 'B', 4: 'Q', 5: 'K',
     6: 'p', 7: 'r', 8: 'n', 9: 'b', 10: 'q', 11: 'k',
     12: '1'
 }
 
+# Mapping of class indices to chess piece unicode characters
 IDX_TO_UNICODE = {
     0: '♙', 1: '♖', 2: '♘', 3: '♗', 4: '♕', 5: '♔', 
     6: '♟', 7: '♜', 8: '♞', 9: '♝', 10: '♛', 11: '♚',
     12: ''
 }
 
+# Mapping of FEN string characters to class indices
 FEN_TO_IDX = {
     'P':0, 'R':1, 'N':2, 'B':3, 'Q':4, 'K':5,
     'p':6, 'r':7, 'n':8, 'b':9, 'q':10, 'k':11
 }
 
+# Mapping of class names to class indices
 CLASS_MAP = {
     'white_pawn': 0,
     'white_rook': 1,    
@@ -33,5 +37,3 @@ CLASS_MAP = {
     
     'empty': 12
 }
-
-EMPTY_LIMIT = 5000 

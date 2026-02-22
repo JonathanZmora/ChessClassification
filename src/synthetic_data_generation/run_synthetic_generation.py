@@ -16,11 +16,6 @@ def now():
 
 
 def extract_out_dir(blender_script_path: Path) -> Path | None:
-    """
-    chess_position_api_v4.py has a hardcoded:
-      OUT_DIR = "C:\\...\\renders"
-    We parse it so we know where Blender actually writes.
-    """
     text = blender_script_path.read_text(encoding="utf-8", errors="ignore")
     m = OUT_DIR_RE.search(text)
     if not m:
@@ -53,8 +48,8 @@ def read_processed_frames(out_csv: Path) -> set[int]:
 def iter_frames_from_csv(csv_path: Path):
     """
     Supports either:
-      - from_frame,to_frame,fen   (your uploaded all_games.csv style)
-      - frame_number,fen         (single-frame rows)
+      - from_frame,to_frame,fen 
+      - frame_number,fen         
     """
     with csv_path.open("r", newline="", encoding="utf-8") as f:
         reader = csv.DictReader(f)
@@ -126,12 +121,12 @@ def main() -> int:
 
     blender_exe = Path(r"/home/zmoraj/blender-5.0.1-linux-x64/blender")
     blend_file = project_dir / "chess-set.blend"
-    blender_script = project_dir / "chess_position_api_v4.py"
+    blender_script = project_dir / "chess_position_api_v5.py"
     perspective_script = project_dir / "perspective_transform.py"
 
     input_csv = (project_dir / args.input).resolve() if not Path(args.input).is_absolute() else Path(args.input)
     out_csv = (project_dir / args.out).resolve()
-    ready_dir = project_dir / "synthetic_data_ready"
+    ready_dir = project_dir / "images"
     ready_dir.mkdir(parents=True, exist_ok=True)
 
     if not blender_exe.exists():
@@ -149,8 +144,6 @@ def main() -> int:
     renders_dir = extract_out_dir(blender_script) or (project_dir / "renders")
     renders_parent = renders_dir.parent  # perspective_transform uses "./renders", so cwd must be parent
     if renders_dir.name.lower() != "renders":
-        # If OUT_DIR is something else, perspective_transform won't find it unless it is literally named "renders".
-        # Most people have OUT_DIR ending with "...\\renders". This is just a safety note.
         print(f"[WARN] OUT_DIR in blender script is '{renders_dir}'. perspective_transform expects a folder named 'renders'.")
     renders_dir.mkdir(parents=True, exist_ok=True)
 
@@ -186,7 +179,7 @@ def main() -> int:
             safe_clean_dir(renders_dir)
 
             try:
-                # 1) Blender render
+                # Blender render
                 run_blender(
                     blender_exe=blender_exe,
                     blend_file=blend_file,
@@ -197,37 +190,37 @@ def main() -> int:
                     cwd=project_dir,
                 )
 
-                # 2) Perspective transform (expects ./renders)
+                # Perspective transform
                 run_perspective(
                     python_exe=Path(sys.executable),
                     perspective_script=perspective_script,
                     cwd=renders_parent,
                 )
 
-                # 3) Rename warped files + move only warped files
-                src_overhead = renders_dir / "1_overhead_warped.png"
+                # Rename warped files and move only warped files
+                src_overhead = renders_dir / "1_overhead_warped.jpg"
                 
                 if args.view == 'white':
                     # In white view, Blender outputs: 2_east, 3_west
-                    src_east = renders_dir / "2_east_warped.png"
-                    src_west = renders_dir / "3_west_warped.png"
+                    src_east = renders_dir / "2_east_warped.jpg"
+                    src_west = renders_dir / "3_west_warped.jpg"
                 else:
                     # In black view, Blender outputs: 2_west, 3_east
-                    src_west = renders_dir / "2_west_warped.png"
-                    src_east = renders_dir / "3_east_warped.png"
+                    src_west = renders_dir / "2_west_warped.jpg"
+                    src_east = renders_dir / "3_east_warped.jpg"
 
                 if not src_overhead.exists() or not src_west.exists() or not src_east.exists():
                     raise FileNotFoundError("One or more warped outputs are missing in renders/.")
 
-                dst_overhead = ready_dir / f"game{game_num}_{frame_num}_{args.view[0]}_overhead_warped.png"
-                dst_west = ready_dir / f"game{game_num}_{frame_num}_{args.view[0]}_west_warped.png"
-                dst_east = ready_dir / f"game{game_num}_{frame_num}_{args.view[0]}_east_warped.png"
+                dst_overhead = ready_dir / f"game{game_num}_{frame_num}_{args.view[0]}_overhead_warped.jpg"
+                dst_west = ready_dir / f"game{game_num}_{frame_num}_{args.view[0]}_west_warped.jpg"
+                dst_east = ready_dir / f"game{game_num}_{frame_num}_{args.view[0]}_east_warped.jpg"
 
                 shutil.move(str(src_overhead), str(dst_overhead))
                 shutil.move(str(src_west), str(dst_west))
                 shutil.move(str(src_east), str(dst_east))
 
-                # 4) Write output row
+                # Write output row
                 original_name = f"frame_{frame_num:06d}.jpg"
                 writer.writerow([
                     game_num,

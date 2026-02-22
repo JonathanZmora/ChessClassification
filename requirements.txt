@@ -24,3 +24,6 @@ Pillow
 seaborn
 scikit-learn
 torchinfo
+pulp
+jupyterlab
+ipywidgets

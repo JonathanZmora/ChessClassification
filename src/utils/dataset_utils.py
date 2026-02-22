@@ -2,13 +2,23 @@ import torch
 from tqdm import tqdm
 from torchvision import transforms
 from torch.utils.data import DataLoader
-from src.preprocessing.dataset import ChessSquareDataset, ChessBoardDataset
+from src.preprocessing.dataset import ChessBoardDataset
 
 
 def get_dataset_stats(dataset, batch_size=16, num_workers=4):
     """
-    Computes mean/std for the given Dataset.
-    Handles the 5D tensor structure [Batch, 64, 3, H, W]
+    Computes mean and standard deviation for the given Dataset.
+    Handles the 5D tensor structure [Batch, Squares, 3, H, W].
+
+    Args:
+        dataset (Dataset): The PyTorch dataset to compute the stats on.
+        batch_size (int, optional): Batch size for the DataLoader. Defaults to 16.
+        num_workers (int, optional): Number of subprocesses to use for data loading. Defaults to 4.
+
+    Returns:
+        tuple[list[float], list[float]]: A tuple containing:
+            - mean: A list of the calculated mean values for each channel.
+            - std: A list of the calculated standard deviation values for each channel.
     """
     loader = DataLoader(dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers)
     
@@ -17,7 +27,7 @@ def get_dataset_stats(dataset, batch_size=16, num_workers=4):
     total_samples = 0
     
     for boards, _ in tqdm(loader, desc="Calculating Stats"):
-        # Flatten Batch and Squares dimensions to [Batch * 64, 3, 64 * 64]
+        # Flatten dimensions to [Batch * Squares, 3, H * W]
         B, S, C, H, W = boards.shape
         flat_boards = boards.view(B * S, C, H * W)
         
@@ -32,111 +42,91 @@ def get_dataset_stats(dataset, batch_size=16, num_workers=4):
     return mean.tolist(), std.tolist()
 
 
-def calculate_stats(train_root, test_root, num_workers):
-    temp_transform = transforms.Compose([transforms.Resize((64, 64)), transforms.ToTensor()])
+def calculate_stats(train_root, test_root, train_size, test_size, num_workers):
+    """
+    Calculates mean and standard deviation for the given train and test datasets
+    using get_dataset_stats.
+
+    Args:
+        train_root (str): Directory path to the training dataset.
+        test_root (str): Directory path to the testing dataset.
+        train_size (int): Target resolution to resize the training square crops.
+        test_size (int): Target resolution to resize the testing square crops.
+        num_workers (int): Number of subprocesses to use for data loading.
+
+    Returns:
+        tuple[list[float], list[float], list[float], list[float]]: A tuple containing:
+            - train_mean: Calculated RGB mean for the training set.
+            - train_std: Calculated RGB standard deviation for the training set.
+            - test_mean: Calculated RGB mean for the test set.
+            - test_std: Calculated RGB standard deviation for the test set.
+    """
+    train_transform = transforms.Compose([transforms.Resize((train_size, train_size)), transforms.ToTensor()])
+    test_transform = transforms.Compose([transforms.Resize((test_size, test_size)), transforms.ToTensor()])
 
     # Load raw datasets
-    train_dataset = ChessBoardDataset(root_dir=train_root, transform=temp_transform)
-    test_dataset = ChessBoardDataset(root_dir=test_root, transform=temp_transform)
+    train_dataset = ChessBoardDataset(root_dir=train_root, transform=train_transform)
+    test_dataset = ChessBoardDataset(root_dir=test_root, transform=test_transform)
     
     print(f"Training samples: {len(train_dataset)} | Test samples: {len(test_dataset)}")
     
     # Compute statistics
     print("Computing mean and std for training data...")
-    train_mean, train_std = get_dataset_stats(train_dataset, batch_size=256, num_workers=num_workers)
+    train_mean, train_std = get_dataset_stats(train_dataset, batch_size=16, num_workers=num_workers)
     print(f"\nCalculated training mean: {train_mean}")
     print(f"Calculated training std:  {train_std}\n")
     
     print("Computing mean and std for test data...")
-    test_mean, test_std = get_dataset_stats(test_dataset, batch_size=256, num_workers=num_workers)
+    test_mean, test_std = get_dataset_stats(test_dataset, batch_size=16, num_workers=num_workers)
     print(f"\nCalculated test mean: {test_mean}")
     print(f"Calculated test std:  {test_std}\n")
 
     return train_mean, train_std, test_mean, test_std
 
 
-def build_transforms(mean, std, mode='train', config=None):
+def build_transforms(mean, std, config=None):
     """
-    Constructs a transform pipeline based on a config dict.
-    
-    config example:
-    {
-        'jitter': True,
-        'blur': False,
-        'noise': True,
-        'geometry': True 
-    }
+    Constructs a composed torchvision transform pipeline based on a configuration dictionary.
+
+    Args:
+        mean (list[float]): RGB mean values for dataset normalization.
+        std (list[float]): RGB standard deviation values for dataset normalization.
+        config (dict, optional): Dictionary specifying augmentation parameters. 
+            Supported keys include 'resize' (int, default 112), 'flip' (float probability), 
+            'jitter' (tuple of brightness, hue), 'blur' (tuple of kernel_size, sigma), 
+            and 'noise' (float noise factor). Defaults to None.
+
+    Returns:
+        torchvision.transforms.Compose: The composed transformation pipeline ready 
+                                        to be applied to the dataset.
     """
-    if config is None: config = {}
+    if config is None: 
+        config = {}
+
+    size = config.get('resize', 112)
     
     transform_list = []
-    transform_list.append(transforms.Resize((64, 64)))
+
+    if size:
+        transform_list.append(transforms.Resize((size, size)))
     transform_list.append(transforms.ToTensor())
     
-    # TRAIN ONLY TRANSFORMS
-    if mode == 'train':
-        # Geometric (Scale/Flip)
-        if config.get('geometry', False):
-            transform_list.append(
-                transforms.RandomResizedCrop(64, scale=(0.85, 1.0), ratio=(0.95, 1.05))
-            )
-            transform_list.append(transforms.RandomHorizontalFlip(p=0.5))
+    if config.get('flip', False):
+        flip_prob = config['flip']
+        transform_list.append(transforms.RandomVerticalFlip(p=flip_prob))
 
-        # Photometric (Color/Lighting)
-        if config.get('jitter', False):
-            brightness, hue = config['jitter']
-            transform_list.append(
-                transforms.ColorJitter(brightness=0.5, hue=0.2)
-            )
+    if config.get('jitter', False):
+        brightness, hue = config['jitter']
+        transform_list.append(transforms.ColorJitter(brightness=brightness, hue=hue))
 
-        # Blur
-        if config.get('blur', False):
-            kernel_size, sigma = config['blur']
-            transform_list.append(
-                transforms.GaussianBlur(kernel_size, sigma)
-            )
-
-        # Noise 
-        if config.get('noise', False):
-            transform_list.append(
-                transforms.Lambda(lambda x: torch.clamp(x + 0.01 * torch.randn_like(x), 0, 1))
-            )
+    if config.get('blur', False):
+        kernel_size, sigma = config['blur']
+        transform_list.append(transforms.GaussianBlur(kernel_size, sigma))
+ 
+    if config.get('noise', False):
+        noise = config['noise']
+        transform_list.append(transforms.Lambda(lambda x: torch.clamp(x + noise * torch.randn_like(x), 0, 1)))
 
     transform_list.append(transforms.Normalize(mean=mean, std=std))
     
     return transforms.Compose(transform_list)
-
-
-def get_square_by_class(dataset, target_class_name, class_names):
-    """
-    Searches the dataset for the first instance of target_class_name.
-    Returns the image tensor reshaped for the model: [1, 3, 64, 64]
-    """
-    # Get the integer index for the class name
-    try:
-        target_idx = class_names.index(target_class_name)
-    except ValueError:
-        print(f"Error: '{target_class_name}' not found in class_names list.")
-        return None
-
-    print(f"Searching for class: '{target_class_name}' (Index: {target_idx})...")
-
-    # Iterate through boards to find the piece
-    for board_image, board_labels in dataset:        
-        # Find indices where the label matches the target
-        matches = (board_labels == target_idx).nonzero(as_tuple=True)[0]
-        
-        if len(matches) > 0:
-            # Take the first match on this board
-            idx = matches[0].item()
-                        
-            # Extract the single square image
-            single_square = board_image[idx]
-            
-            # Add a batch dimension because the model expects [1, 3, 64, 64]
-            input_tensor = single_square.unsqueeze(0)
-            
-            return input_tensor
-
-    print(f"Could not find any samples of {target_class_name} in the dataset.")
-    return None
