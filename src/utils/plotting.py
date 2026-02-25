@@ -225,13 +225,13 @@ def visualize_test_samples_with_solver(model, dataset, num_samples=3, device='cp
         
         # Print text comparison
         print(f"True FEN:   {true_fen}")
-        print(f"CNN FEN:    {base_fen}")
+        print(f"Model FEN:    {base_fen}")
         print(f"Solver FEN: {solver_fen}")
         
         if true_fen == solver_fen:
             print("SOLVER PERFECT MATCH\n")
         elif true_fen == base_fen:
-            print("CNN PERFECT MATCH (Solver messed it up)\n")
+            print("MODEL PERFECT MATCH (Solver messed it up)\n")
         else:
             print("MISMATCH ON BOTH\n")
 

@@ -27,3 +27,4 @@ torchinfo
 pulp
 jupyterlab
 ipywidgets
+chessboard-image

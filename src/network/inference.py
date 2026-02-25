@@ -2,7 +2,7 @@ import torch
 import pulp
 import numpy as np
 from torchvision import transforms
-from tqdm.notebook import tqdm
+from tqdm import tqdm
 
 
 _infer_transform = transforms.Compose([
