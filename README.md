@@ -42,7 +42,7 @@ this project explores the use of mostly [synthetic data](https://en.wikipedia.or
 generated through a digital rendering pipeline, together with learning strategies designed to
 improve generalization from synthetic images to real photographs.
 
-The course is taught by Prof. Oren Freifeld, with the course TA, Mr. Roy Amoyal.
+The course is taught by [Prof. Oren Freifeld](https://www.cs.bgu.ac.il/~orenfr/index.htm), with the course TA, Mr. Roy Amoyal.
 
 ## Project Overview
 
