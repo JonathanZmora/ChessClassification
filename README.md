@@ -23,7 +23,7 @@ This project was completed by:
 - [Jonathan Zmora](https://github.com/JonathanZmora)
 - [Lior Vinman](https://github.com/liorvi35)
 
-We are first-year M.Sc. students in the Department of Computer Science at
+We are first-year M.Sc. students in the Department of Computer and Information Science at
 [Ben Gurion University](https://www.bgu.ac.il/en/).
 
 ## Introduction
