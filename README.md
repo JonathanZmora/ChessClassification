@@ -64,7 +64,7 @@ The project includes data preparation scripts, model training, evaluation on bot
 and a series of experiments analyzing how synthetic training data can improve real world chessboard recognition.
 
 Overall, the project develops and studies a complete pipeline for chessboard state recognition
-using **ResNet18** and **ConvNeXt** models.
+using ResNet18 and ConvNeXt models.
 
 ## Prerequisites
 
