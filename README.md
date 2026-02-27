@@ -127,6 +127,10 @@ The project should now be ready to use.
 
 ## Usage
 
+### Via Source Code
+
+### Via Web Application
+
 ## Dataset
 
 ## Approach
