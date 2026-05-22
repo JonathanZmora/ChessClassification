@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="title" content="Synthetic Is All You Need? - Chessboard State Classification">
+  <meta name="description" content="A sim-to-real chessboard state classification pipeline using high-fidelity Blender synthetic data, ConvNeXt features, Transformer context routing, and ILP-constrained inference.">
+  <meta name="keywords" content="chessboard state classification, synthetic data, sim-to-real, computer vision, ConvNeXt, Transformer Encoder, Integer Linear Programming, FEN, Blender, deep learning">
+  <meta name="author" content="Jonathan Zmora, Lior Vinman">
+  <meta name="robots" content="index, follow">
+  <meta name="language" content="English">
+
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Ben-Gurion University of the Negev">
+  <meta property="og:title" content="Synthetic Is All You Need?">
+  <meta property="og:description" content="High-fidelity synthetic rendering and logically constrained inference for real-world chessboard state classification.">
+  <meta property="og:image" content="static/images/social_preview.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Synthetic Is All You Need? - Research Preview">
+  <meta property="article:published_time" content="2026-01-01T00:00:00.000Z">
+  <meta property="article:author" content="Jonathan Zmora">
+  <meta property="article:author" content="Lior Vinman">
+  <meta property="article:section" content="Research">
+  <meta property="article:tag" content="Synthetic Data">
+  <meta property="article:tag" content="Computer Vision">
+  <meta property="article:tag" content="Chessboard State Classification">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Synthetic Is All You Need?">
+  <meta name="twitter:description" content="A sim-to-real pipeline for chessboard state classification with high-fidelity synthetic data and ILP-constrained inference.">
+  <meta name="twitter:image" content="static/images/social_preview.png">
+  <meta name="twitter:image:alt" content="Synthetic Is All You Need? - Research Preview">
+
+  <meta name="citation_title" content="Synthetic Is All You Need?">
+  <meta name="citation_author" content="Zmora, Jonathan">
+  <meta name="citation_author" content="Vinman, Lior">
+  <meta name="citation_publication_date" content="2026">
+  <meta name="citation_conference_title" content="Introduction to Deep Learning">
+  <meta name="citation_pdf_url" content="static/pdfs/synthetic_is_all_you_need_paper.pdf">
+  <meta name="theme-color" content="#2563eb">
+
+  <title>Synthetic Is All You Need? | ChessClassification</title>
+  <link rel="icon" type="image/png" href="static/images/favicon.ico">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #ffffff;
+      --text: #1f2937;
+      --muted: #64748b;
+      --heading: #0f172a;
+      --line: #e5e7eb;
+      --soft: #f8fafc;
+      --soft-blue: #eff6ff;
+      --blue: #2563eb;
+      --blue-dark: #1d4ed8;
+      --dark: #111827;
+      --shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background: var(--bg);
+      line-height: 1.65;
+    }
+    a { color: var(--blue); text-decoration: none; }
+    a:hover { color: var(--blue-dark); text-decoration: underline; }
+    img { max-width: 100%; display: block; }
+    .container { width: min(1120px, calc(100% - 40px)); margin: 0 auto; }
+    .is-max-desktop { width: min(960px, calc(100% - 40px)); margin: 0 auto; }
+    .section, .hero-body { padding: 4.5rem 0; }
+    .hero { background: #fff; }
+    .is-light { background: var(--soft); }
+    .has-text-centered { text-align: center; }
+    .has-text-justified { text-align: justify; }
+    .title { color: var(--heading); font-weight: 800; line-height: 1.08; margin: 0 0 1rem; }
+    .title.is-1 { font-size: clamp(2.35rem, 7vw, 4.8rem); letter-spacing: -0.055em; }
+    .title.is-2 { font-size: clamp(2rem, 4vw, 3rem); letter-spacing: -0.035em; }
+    .title.is-3 { font-size: clamp(1.55rem, 2.6vw, 2.1rem); letter-spacing: -0.025em; }
+    .subtitle { color: var(--muted); font-size: 1.12rem; max-width: 780px; margin: 0 auto 1.6rem; }
+    .publication-title { max-width: 980px; margin-left: auto; margin-right: auto; }
+    .publication-authors { font-size: 1.12rem; color: #334155; margin: 0.35rem 0; }
+    .author-block { display: inline-block; margin: 0 0.25rem; }
+    .eql-cntrb { color: var(--muted); }
+    .publication-links { display: flex; flex-wrap: wrap; gap: 0.75rem; justify-content: center; margin-top: 2rem; }
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 42px;
+      padding: 0.65rem 1.05rem;
+      border-radius: 999px;
+      font-weight: 700;
+      border: 1px solid transparent;
+      box-shadow: 0 8px 18px rgba(15, 23, 42, 0.12);
+      transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+    }
+    .button:hover { transform: translateY(-1px); text-decoration: none; }
+    .is-dark { background: var(--dark); color: #fff; }
+    .is-dark:hover { background: #000; color: #fff; }
+    .is-light-button { background: #fff; color: var(--heading); border-color: var(--line); box-shadow: none; }
+    .columns { display: flex; gap: 2rem; align-items: stretch; }
+    .columns.is-centered { justify-content: center; }
+    .column { flex: 1; min-width: 0; }
+    .column.is-four-fifths { flex: 0 1 80%; }
+    .content p { margin-top: 0; }
+    .content ul { margin: 1rem 0 0; padding-left: 1.35rem; }
+    .content li { margin: 0.55rem 0; }
+    .summary-strip {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 1rem;
+      margin-top: 2.5rem;
+    }
+    .metric-card, .card {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+      padding: 1.35rem;
+    }
+    .metric-value { color: var(--blue); font-size: 2rem; font-weight: 800; line-height: 1; }
+    .metric-label { color: var(--muted); font-weight: 600; margin-top: 0.5rem; font-size: 0.95rem; }
+    .overview-grid, .method-grid, .figure-grid {
+      display: grid;
+      gap: 1.25rem;
+      margin-top: 2rem;
+    }
+    .overview-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .method-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .figure-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .card h3 { color: var(--heading); margin: 0 0 0.55rem; font-size: 1.15rem; }
+    .card p { margin: 0; color: #475569; }
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      background: var(--soft-blue);
+      color: var(--blue-dark);
+      padding: 0.32rem 0.65rem;
+      font-weight: 700;
+      font-size: 0.82rem;
+      margin-bottom: 0.85rem;
+    }
+    .figure-card {
+      overflow: hidden;
+      padding: 0;
+    }
+    .figure-card img {
+      width: 100%;
+      background: #fff;
+      border-bottom: 1px solid var(--line);
+    }
+    .figure-caption { padding: 1rem 1.15rem 1.2rem; color: #475569; font-size: 0.95rem; }
+    .publication-video {
+      position: relative;
+      padding-bottom: 56.25%;
+      height: 0;
+      overflow: hidden;
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+      background: #0f172a;
+    }
+    .publication-video iframe {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+    .table-wrap {
+      overflow-x: auto;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      box-shadow: var(--shadow);
+      margin: 1.5rem 0 2rem;
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+    th, td { padding: 0.85rem 1rem; text-align: left; border-bottom: 1px solid var(--line); vertical-align: top; }
+    th { background: #f1f5f9; color: var(--heading); font-weight: 800; }
+    tr:last-child td { border-bottom: 0; }
+    .highlight-row td { background: #eff6ff; font-weight: 700; }
+    .split { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: start; }
+    .callout {
+      background: linear-gradient(135deg, #eff6ff, #ffffff);
+      border: 1px solid #bfdbfe;
+      border-radius: 22px;
+      padding: 1.35rem;
+    }
+    .callout strong { color: var(--heading); }
+    .bibtex-header { display: flex; justify-content: space-between; gap: 1rem; align-items: center; }
+    pre {
+      white-space: pre-wrap;
+      word-break: break-word;
+      background: #0f172a;
+      color: #e2e8f0;
+      border-radius: 18px;
+      padding: 1.25rem;
+      overflow-x: auto;
+    }
+    code { font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace; font-size: 0.92rem; }
+    .copy-bibtex-btn {
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--heading);
+      border-radius: 999px;
+      font-weight: 700;
+      padding: 0.55rem 0.85rem;
+      cursor: pointer;
+    }
+    .copy-bibtex-btn:hover { background: #f8fafc; }
+    .footer { background: #f1f5f9; padding: 2.5rem 0; color: #475569; font-size: 0.95rem; }
+    .scroll-to-top {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 0;
+      color: #fff;
+      background: var(--blue);
+      box-shadow: var(--shadow);
+      cursor: pointer;
+      display: none;
+      z-index: 20;
+    }
+    .scroll-to-top.visible { display: block; }
+    .tiny-note { color: var(--muted); font-size: 0.92rem; margin-top: 0.75rem; }
+
+    @media (max-width: 900px) {
+      .summary-strip, .overview-grid, .method-grid, .figure-grid, .split { grid-template-columns: 1fr; }
+      .columns { flex-direction: column; }
+      .column.is-four-fifths { flex-basis: auto; }
+      .section, .hero-body { padding: 3.2rem 0; }
+      .has-text-justified { text-align: left; }
+    }
+  </style>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "ScholarlyArticle",
+    "headline": "Synthetic Is All You Need?",
+    "description": "A sim-to-real chessboard state classification pipeline using high-fidelity synthetic rendering, ConvNeXt local feature extraction, Transformer context routing, and ILP-constrained inference.",
+    "author": [
+      {
+        "@type": "Person",
+        "name": "Jonathan Zmora",
+        "affiliation": { "@type": "Organization", "name": "Ben-Gurion University of the Negev" }
+      },
+      {
+        "@type": "Person",
+        "name": "Lior Vinman",
+        "affiliation": { "@type": "Organization", "name": "Ben-Gurion University of the Negev" }
+      }
+    ],
+    "datePublished": "2026-01-01",
+    "publisher": { "@type": "Organization", "name": "Ben-Gurion University of the Negev" },
+    "keywords": ["synthetic data", "sim-to-real", "chessboard state classification", "computer vision", "ConvNeXt", "Transformer Encoder", "Integer Linear Programming"],
+    "abstract": "This work tackles synthetic-to-real generalization for chessboard state classification. A high-fidelity Blender rendering pipeline improves zero-shot transfer, a ConvNeXt and Transformer architecture combines local square evidence with global board context, and an ILP solver enforces chessboard constraints to reach 97.3% accuracy on real-world test data.",
+    "isAccessibleForFree": true,
+    "mainEntity": { "@type": "WebPage", "name": "Synthetic Is All You Need?" }
+  }
+  </script>
+</head>
+<body>
+  <button class="scroll-to-top" onclick="scrollToTop()" title="Scroll to top" aria-label="Scroll to top">↑</button>
+
+  <main id="main-content">
+    <section class="hero">
+      <div class="hero-body">
+        <div class="container is-max-desktop has-text-centered">
+          <h1 class="title is-1 publication-title">Synthetic Is All You Need?</h1>
+          <p class="subtitle">Chessboard State Classification from Synthetic Data with Global Context and Logically Constrained Inference</p>
+
+          <div class="publication-authors">
+            <span class="author-block"><a href="https://github.com/JonathanZmora" target="_blank" rel="noopener">Jonathan Zmora</a><sup>*</sup></span>
+            <span class="author-block"><a href="https://github.com/liorvi35" target="_blank" rel="noopener">Lior Vinman</a><sup>*</sup></span>
+          </div>
+          <div class="publication-authors">
+            <span class="author-block">The Stein Faculty of Computer and Information Science<br>Ben-Gurion University of the Negev, Israel</span>
+            <span class="eql-cntrb"><small><br><sup>*</sup>Equal contribution</small></span>
+          </div>
+
+          <div class="publication-links">
+            <a href="static/pdfs/synthetic_is_all_you_need_paper.pdf" target="_blank" rel="noopener" class="external-link button is-dark">Paper PDF</a>
+            <a href="https://github.com/JonathanZmora/ChessClassification" target="_blank" rel="noopener" class="external-link button is-dark">Code</a>
+            <a href="#results" class="external-link button is-light-button">Results</a>
+            <a href="#BibTeX" class="external-link button is-light-button">Cite</a>
+			<a href="./app.html" class="external-link button is-light-button">Demo Page</a>
+          </div>
+
+          <div class="summary-strip" aria-label="Key results">
+            <div class="metric-card">
+              <div class="metric-value">97.3%</div>
+              <div class="metric-label">Final real-world per-square accuracy</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-value">87.55%</div>
+              <div class="metric-label">Zero-shot accuracy with ConvNeXt + Transformer + ILP</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-value">64</div>
+              <div class="metric-label">Per-square predictions per board image</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-value">13</div>
+              <div class="metric-label">Piece classes: 12 pieces plus empty square</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section hero is-light" id="abstract">
+      <div class="container is-max-desktop">
+        <div class="columns is-centered has-text-centered">
+          <div class="column is-four-fifths">
+            <h2 class="title is-3">Abstract</h2>
+            <div class="content has-text-justified">
+              <p>
+                Transferring computer vision algorithms from simulation to real-world deployment remains difficult because lighting, textures, sensor noise, reflections, and camera artifacts create a substantial domain gap. This project studies the synthetic-to-real generalization problem for chessboard state classification: given a single RGB image of a physical board, the model predicts the state of each of the 64 squares and reconstructs the corresponding board state.
+              </p>
+              <p>
+                We bridge the gap with a high-fidelity Blender rendering pipeline, a local ConvNeXt feature extractor combined with Transformer-based global board context, and an Integer Linear Programming solver that enforces chessboard legality constraints over the neural network logits. After zero-shot training on synthetic data and targeted real-world fine-tuning, the final model reaches 97.3% real-world test accuracy.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="overview">
+      <div class="container">
+        <div class="has-text-centered">
+          <h2 class="title is-2">Research Overview</h2>
+          <p class="subtitle">The pipeline combines data-centric simulation, neural architecture design, and chess-specific logical constraints.</p>
+        </div>
+        <div class="overview-grid">
+          <div class="card">
+            <span class="tag">Synthetic Data</span>
+            <h3>High-fidelity Blender rendering</h3>
+            <p>The synthetic pipeline models physical chessboard traits such as realistic wood grain, specular highlights, calibrated lighting, camera jitter, rotations, sensor noise, dithering, and JPEG compression.</p>
+          </div>
+          <div class="card">
+            <span class="tag">Hybrid Model</span>
+            <h3>Local features plus global context</h3>
+            <p>Each board is decomposed into 64 padded square crops. ConvNeXt-T extracts local visual features, while a Transformer Encoder routes information across the complete board.</p>
+          </div>
+          <div class="card">
+            <span class="tag">Valid Inference</span>
+            <h3>ILP as a logic filter</h3>
+            <p>An Integer Linear Programming solver chooses the highest-scoring legal board configuration, enforcing constraints such as one king per color, piece-count limits, and invalid pawn locations.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section hero is-light" id="figures">
+      <div class="container">
+        <div class="has-text-centered">
+          <h2 class="title is-2">Visual Pipeline</h2>
+          <p class="subtitle">Figures adapted from the paper highlight the core sim-to-real and constrained-inference design choices.</p>
+        </div>
+        <div class="figure-grid">
+          <figure class="card figure-card">
+            <img src="static/images/figure1_synthetic_vs_real.png" alt="Synthetic and real chessboard comparison" loading="lazy">
+            <figcaption class="figure-caption"><strong>Synthetic vs	 real:</strong> a high-fidelity Blender-rendered chessboard compared with a real-world board image from the collected dataset.</figcaption>
+          </figure>
+          <figure class="card figure-card">
+            <img src="static/images/figure3_architecture.png" alt="ConvNeXt Transformer ILP architecture" loading="lazy">
+            <figcaption class="figure-caption"><strong>Architecture:</strong> padded square crops are processed by ConvNeXt, routed through a Transformer Encoder, and corrected by ILP-constrained inference.</figcaption>
+          </figure>
+          <figure class="card figure-card">
+            <img src="static/images/figure2_crop_padding.png" alt="Crop padding comparison" loading="lazy">
+            <figcaption class="figure-caption"><strong>Preprocessing:</strong> crop padding preserves context from neighboring squares, including tall pieces and shadows that cross square boundaries.</figcaption>
+          </figure>
+          <figure class="card figure-card">
+            <img src="static/images/figure4_ilp_solver.png" alt="Predictions before and after ILP solver" loading="lazy">
+            <figcaption class="figure-caption"><strong>Logic correction:</strong> the ILP solver removes illegal configurations and reconstructs a structurally valid board state.</figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="method">
+      <div class="container">
+        <div class="has-text-centered">
+          <h2 class="title is-2">Methodology</h2>
+          <p class="subtitle">The system is designed around the fact that chessboard state recognition is both a visual task and a structured prediction task.</p>
+        </div>
+        <div class="method-grid">
+          <div class="card">
+            <h3>1. Synthetic dataset generation</h3>
+            <p>FEN strings are converted into rendered chessboards using a parameterized Blender pipeline. Materials, lighting, viewpoints, piece rotations, and image degradation are randomized to encourage robust features instead of overfitting to clean synthetic edges.</p>
+          </div>
+          <div class="card">
+            <h3>2. Input representation</h3>
+            <p>The 480 x 480 board image is split into an 8 x 8 grid. Each square is padded, resized to 112 x 112, normalized, and treated as one token in an ordered 64-square sequence.</p>
+          </div>
+          <div class="card">
+            <h3>3. Feature extraction and context routing</h3>
+            <p>ConvNeXt-T produces a local embedding for every square. Learned positional embeddings and multi-head self-attention allow the Transformer Encoder to use board-level spatial relationships when resolving ambiguous crops.</p>
+          </div>
+          <div class="card">
+            <h3>4. Constrained inference</h3>
+            <p>The ILP solver maximizes the selected logits while enforcing single occupancy, king counts, maximum piece counts, class-specific limits, and invalid pawn rank constraints.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section hero is-light" id="datasets">
+      <div class="container">
+        <div class="split">
+          <div>
+            <h2 class="title is-3">Datasets and Evaluation</h2>
+            <div class="content">
+              <p>The experiments use three carefully separated datasets to measure the domain gap, zero-shot transfer, and real-world adaptation.</p>
+              <ul>
+                <li><strong>Naive Synthetic:</strong> low-fidelity Blender renders from documented chess games, used as the baseline for quantifying the sim-to-real gap.</li>
+                <li><strong>High-Fidelity Synthetic:</strong> 1,800 training images from 600 unique random FEN positions rendered from three perspectives.</li>
+                <li><strong>Real-World Target:</strong> 238 training images, 67 validation images, and a 204-image holdout test set from distinct real matches.</li>
+              </ul>
+            </div>
+          </div>
+          <div class="callout">
+            <strong>Primary metric:</strong> per-square accuracy over the 64 board squares and 13 labels.<br><br>
+            <strong>Secondary metric:</strong> board-level accuracy, where a board is correct only if all 64 squares are classified perfectly.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="results">
+      <div class="container">
+        <div class="has-text-centered">
+          <h2 class="title is-2">Experimental Results</h2>
+          <p class="subtitle">The results show a consistent progression: high-fidelity synthetic data improves zero-shot transfer, global context improves the ConvNeXt baseline, and targeted real-world fine-tuning reaches the strongest per-square accuracy.</p>
+        </div>
+
+        <h3 class="title is-3">Zero-shot transfer</h3>
+        <div class="table-wrap">
+          <table aria-label="Zero-shot transfer accuracy">
+            <thead>
+              <tr>
+                <th>Architecture</th>
+                <th>Training Data</th>
+                <th>Augmentation</th>
+                <th>Padding</th>
+                <th>Accuracy</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>ResNet18</td><td>Naive</td><td>None</td><td>0.0</td><td>63.42%</td></tr>
+              <tr><td>ResNet18</td><td>Naive</td><td>Blur, Noise, Jitter</td><td>0.0</td><td>66.89%</td></tr>
+              <tr><td>ResNet18</td><td>High-Fidelity</td><td>None</td><td>0.0</td><td>72.10%</td></tr>
+              <tr><td>ResNet18</td><td>High-Fidelity</td><td>None</td><td>1.0</td><td>80.92%</td></tr>
+              <tr><td>ConvNeXt-T</td><td>High-Fidelity</td><td>None</td><td>1.0</td><td>86.86%</td></tr>
+              <tr class="highlight-row"><td>ConvNeXt-T + Transformer</td><td>High-Fidelity</td><td>None</td><td>1.0</td><td>87.55%</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 class="title is-3">Real-world domain adaptation</h3>
+        <div class="table-wrap">
+          <table aria-label="Real-world domain adaptation strategies">
+            <thead>
+              <tr>
+                <th>Strategy</th>
+                <th>Backbone State</th>
+                <th>Square Accuracy</th>
+                <th>Board Accuracy</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>Linear Probing</td><td>Frozen</td><td>96.65%</td><td>16.67%</td></tr>
+              <tr class="highlight-row"><td>Stage-4 Unfreezing</td><td>Final Stage Fine-Tuned</td><td>97.27%</td><td>25.49%</td></tr>
+              <tr><td>Joint Training</td><td>End-to-End Trained</td><td>95.94%</td><td>32.35%</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 class="title is-3">ILP solver contribution</h3>
+        <div class="table-wrap">
+          <table aria-label="ILP solver performance gains">
+            <thead>
+              <tr>
+                <th>Architecture</th>
+                <th>Phase</th>
+                <th>Raw Accuracy</th>
+                <th>Solver Accuracy</th>
+                <th>Gain</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>ResNet18</td><td>Zero-Shot</td><td>76.64%</td><td>80.92%</td><td>+4.28</td></tr>
+              <tr><td>ConvNeXt</td><td>Zero-Shot</td><td>84.78%</td><td>86.86%</td><td>+2.08</td></tr>
+              <tr><td>ConvNeXt + Transformer</td><td>Zero-Shot</td><td>85.81%</td><td>87.55%</td><td>+1.74</td></tr>
+              <tr><td>ConvNeXt (Frozen)</td><td>Fine-Tuning</td><td>94.69%</td><td>96.65%</td><td>+1.96</td></tr>
+              <tr class="highlight-row"><td>ConvNeXt (Unfrozen)</td><td>Fine-Tuning</td><td>95.87%</td><td>97.27%</td><td>+1.40</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="section hero is-light" id="domain-gap">
+      <div class="container">
+        <div class="split">
+          <figure class="card figure-card">
+            <img src="static/images/figure5_feature_maps.png" alt="Feature maps showing sim-to-real domain gap" loading="lazy">
+            <figcaption class="figure-caption"><strong>Domain gap evidence:</strong> real-world activations are noisy and distorted compared with cleaner naive synthetic activations.</figcaption>
+          </figure>
+          <div>
+            <h2 class="title is-3">What the Ablations Show</h2>
+            <div class="content">
+              <p><strong>Global context matters.</strong> Adding the Transformer Encoder improves raw zero-shot accuracy by routing information across all 64 square embeddings before logical filtering.</p>
+              <p><strong>Logic matters.</strong> The ILP solver consistently increases accuracy across baselines and fine-tuned models without additional training, because it removes impossible board states that a purely probabilistic classifier may output.</p>
+              <p><strong>ConvNeXt was the most effective backbone.</strong> DINO-pretrained ViT variants underperformed in this constrained dataset regime, likely because convolutional inductive biases are well-suited to localized chess-piece geometry.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="limitations">
+      <div class="container is-max-desktop">
+        <h2 class="title is-3 has-text-centered">Limitations and Future Work</h2>
+        <div class="content has-text-justified">
+          <p>
+            The synthetic dataset size and rendered physical phenomena were bounded by available computational resources and time. Future work can scale the Blender pipeline with larger datasets, broader randomization ranges, additional materials, more piece geometries, and richer lighting conditions. These improvements may further narrow the visual domain gap and make zero-shot deployment more reliable without physical fine-tuning.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="hero is-small is-light" id="video">
+      <div class="hero-body">
+        <div class="container has-text-centered">
+          <h2 class="title is-3">Video Presentation</h2>
+          <div class="columns is-centered">
+            <div class="column is-four-fifths">
+              <div class="publication-video">
+                <iframe src="static/videos/chess_classification_poc.mp4" title="Synthetic Is All You Need video presentation" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="BibTeX">
+      <div class="container is-max-desktop content">
+        <div class="bibtex-header">
+          <h2 class="title">BibTeX</h2>
+          <button class="copy-bibtex-btn" onclick="copyBibTeX()" title="Copy BibTeX to clipboard"><span class="copy-text">Copy</span></button>
+        </div>
+        <pre id="bibtex-code"><code>@misc{zmora_vinman_synthetic_2026,
+  title        = {Synthetic Is All You Need?},
+  author       = {Jonathan Zmora and Lior Vinman},
+  institution  = {Ben-Gurion University of the Negev},
+  year         = {2026},
+  note         = {Introduction to Deep Learning project},
+  url          = {https://github.com/JonathanZmora/ChessClassification}
+}</code></pre>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container is-max-desktop">
+      <p>
+        This page was built using the Academic Project Page Template style, adapted from the Nerfies project page. The research content is based on <em>Synthetic Is All You Need?</em> by Jonathan Zmora and Lior Vinman.
+      </p>
+    </div>
+  </footer>
+
+  <script>
+    function scrollToTop() {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+    window.addEventListener("scroll", function () {
+      var button = document.querySelector(".scroll-to-top");
+      if (window.scrollY > 480) {
+        button.classList.add("visible");
+      } else {
+        button.classList.remove("visible");
+      }
+    });
+    function copyBibTeX() {
+      var code = document.getElementById("bibtex-code").innerText;
+      navigator.clipboard.writeText(code).then(function () {
+        var label = document.querySelector(".copy-text");
+        var original = label.textContent;
+        label.textContent = "Copied";
+        setTimeout(function () { label.textContent = original; }, 1800);
+      });
+    }
+  </script>
+</body>
+</html>
