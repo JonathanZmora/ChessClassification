@@ -144,17 +144,17 @@ os.environ["PATH_TO_MODEL"] = "/path/to/model.pth"
 
 or via shell - here are examples for common shell environments on Windows and Linux,
 
-Windows CMD:
+**Windows CMD**:
 ```shell
 set PATH_TO_MODEL="/path/to/model.pth"
 ```
 
-Windows Powershell:
+**Windows PowerShell**:
 ```shell
 $env:PATH_TO_MODEL = "/path/to/model.pth"
 ```
 
-Linux:
+**Linux bash**:
 ```shell
 export PATH_TO_MODEL="/path/to/model.pth"
 ```
