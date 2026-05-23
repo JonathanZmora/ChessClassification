@@ -1,3 +1,4 @@
+import os
 import cv2
 import torch
 import pulp
@@ -14,9 +15,9 @@ def predict_board(image: np.ndarray) -> torch.Tensor:
         image (np.ndarray): an array that represents a chessboard image
 
     Notes:
-        * Please note that to use this function, you should manually update the path at the `model`
-            this is done like that, because project's requirements explicitly asked for `predict_board()`
-            receive only an image as an argument.
+        * Please note that to use this function, you should first manually set the path to the model, via an environment
+            variable which is called "PATH_TO_MODEL". This is done like that, because project's requirements
+            explicitly asked for `predict_board()` to receive only an image as a single argument.
 
         * Project's models could be found here:
             https://drive.google.com/drive/folders/1nLEzm4LjWIXToCoKd1IA6LpzQ0f2tguT?usp=drive_link
@@ -24,8 +25,13 @@ def predict_board(image: np.ndarray) -> torch.Tensor:
     Returns:
         torch.Tensor: a 8x8 int64 torch tensor, that classifies every cell in the original chessboard image
     """
+    # get path model from env
+    model_path: str = os.environ.get("PATH_TO_MODEL")
+    if model_path is None:
+        raise ValueError("Please set `PATH_TO_MODEL` environment variable with model's path!")
+
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = torch.load("path/to/model.pth", map_location=device, weights_only=False)
+    model = torch.load(model_path, map_location=device, weights_only=False)
 
     infer_transform = transforms.Compose([
         transforms.ToPILImage(),

@@ -127,9 +127,64 @@ The project should now be ready to use.
 
 ## Usage
 
-### Via Source Code
+### Train
 
-### Via Web Application
+### Inference
+
+#### Developer
+
+After the project is successfully cloned and installed (see [Prerequisites](#Prerequisites) and [Installation](#installation)),
+you may want to use the `predict_board()` function.
+
+Before using it, you need to set an env variable, with the model's path. This could be done via Python:
+```python
+import os
+os.environ["PATH_TO_MODEL"] = "/path/to/model.pth"
+```
+
+or via shell - here are examples for common shell environments on Windows and Linux,
+
+Windows CMD:
+```shell
+set PATH_TO_MODEL="/path/to/model.pth"
+```
+
+Windows Powershell:
+```shell
+$env:PATH_TO_MODEL = "/path/to/model.pth"
+```
+
+Linux:
+```shell
+export PATH_TO_MODEL="/path/to/model.pth"
+```
+
+Only after exporting such environment variable, you can proceed and import the method and use it.
+See this E2E example for using our SDK:
+```python
+import os
+
+import numpy as np
+import torch
+
+from src.network.inference import predict_board
+
+# setting a model path as env
+os.environ["PATH_TO_MODEL"] = "/home/user/Documents/model.pth"
+
+# getting an image, as numpy array
+my_chessboard_image: np.ndarray = np.ndarray(...)
+
+# making an inference of the image, via the configured model
+board_prediction: torch.Tensor = predict_board(my_chessboard_image)
+```
+
+#### End-User
+
+It is possible to run image predictions using our [web app](https://jonathanzmora.github.io/ChessClassification/app.html)
+
+First of all, press `Ping Backend` to ensure the BE VM is up and working, then you can press `Test me!` to use 
+a random sampled image from a small dataset, or press `Choose image` then `Classify board` to upload image of your own. 
 
 ## Technical: Dataset, Approach and Results
 
@@ -157,9 +212,12 @@ This project demonstrates practical work in:
 If you use this repository in academic research, please cite:
 
 ```bibtex
-@misc{zmora_vinman_chessclassification,
-  title  = {Synthetic Is All You Need?},
-  author = {Jonathan Zmora and Lior Vinman},
-  year   = {2026}
+@misc{zmora_vinman_synthetic_2026,
+  title        = {Synthetic Is All You Need?},
+  author       = {Jonathan Zmora and Lior Vinman},
+  institution  = {Ben-Gurion University of the Negev},
+  year         = {2026},
+  note         = {Introduction to Deep Learning project},
+  url          = {https://github.com/JonathanZmora/ChessClassification}
 }
 ```
