@@ -11,9 +11,8 @@ def predict_board(image: np.ndarray) -> torch.Tensor:
     Predict the chessboard state from a single RGB image.
     Output: (8, 8) int64 torch tensor.
     """
-    model = torch.load('path/to/model.pth', weights_only=False)
-        
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    model = torch.load("convnext_fine_tuned_final_stage.pth", map_location=device, weights_only=False)
 
     infer_transform = transforms.Compose([
         transforms.ToPILImage(),
@@ -28,43 +27,44 @@ def predict_board(image: np.ndarray) -> torch.Tensor:
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
     squares = []
-    
-    H, W = img.shape[:2]
+
+    H, W = image.shape[:2]
     sq_h, sq_w = H / 8.0, W / 8.0
-    
+
     # Padding config
-    h_pad = (sq_h / 2.0) * (1 + self.padding)
-    w_pad = (sq_w / 2.0) * (1 + self.padding)
+    padding: float = 1.0
+    h_pad = (sq_h / 2.0) * (1 + padding)
+    w_pad = (sq_w / 2.0) * (1 + padding)
 
     # Slice squares
     for r in range(8):
         for f in range(8):
             y_c = (r + 0.5) * sq_h
             x_c = (f + 0.5) * sq_w
-            
+
             y1 = int(max(0, y_c - h_pad))
             y2 = int(min(H, y_c + h_pad))
             x1 = int(max(0, x_c - w_pad))
             x2 = int(min(W, x_c + w_pad))
-            
-            crop = img[y1:y2, x1:x2]
+
+            crop = image[y1:y2, x1:x2]
 
             crop_tensor = infer_transform(crop)
 
             squares.append(crop_tensor)
-        
+
     # Stack into a [64, 3, H, W] tensor
     board_tensor = torch.stack(squares).to(device)
-            
-    # Inference    
+
+    # Inference
     model.eval()
     with torch.no_grad():
         logits = model(board_tensor)
-        probs = torch.softmax(outputs, dim=1).cpu().numpy()
+        probs = torch.softmax(logits, dim=1).cpu().numpy()
         board_probs = probs.reshape(64, 13)
         preds = solve_chess_board_ilp(board_probs)
-        
-    return preds.view(8, 8).cpu().to(dtype=torch.int64)
+
+    return torch.from_numpy(preds.reshape(8, 8)).cpu().to(dtype=torch.int64)
 
 
 def predict(model, dataloader, device='cpu'):
