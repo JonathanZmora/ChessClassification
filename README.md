@@ -134,7 +134,7 @@ The project should now be ready to use.
 #### Developer
 
 After the project is successfully cloned and installed (see [Prerequisites](#Prerequisites) and [Installation](#installation)),
-you may want to use the `predict_board()` function.
+you may want to use the `predict_board()` function, which returns a prediction for a single chessboard picture.
 
 Before using it, you need to set an env variable, with the model's path. This could be done via Python:
 ```python
