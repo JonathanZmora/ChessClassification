@@ -1,5 +1,13 @@
 import torch
 import torch.nn as nn
+from torchvision import models
+
+
+model_names = {
+    "convnext_zero_shot",
+    "convnext_transformer",
+    "convnext_fine_tuned_final_stage"
+}
 
 
 class ConvTransformer(nn.Module):
@@ -143,3 +151,37 @@ class DinoTransformer(nn.Module):
         logits = self.classifier(transformer_out)
         
         return logits.view(B * 64, -1)
+
+
+def init_model(model_name, saved_model_path):
+    if model_name not in model_names:
+        raise ValueError("model name not in allowed names list")
+
+    if not saved_model_path:
+        model = models.convnext_tiny(weights=models.ConvNeXt_Tiny_Weights.IMAGENET1K_V1)
+        in_features = model.classifier[2].in_features
+        model.classifier[2] = nn.Linear(in_features, 13)
+
+    elif "transformer" in model_name:
+        model = torch.load(saved_model_path, weights_only=False)
+
+    else:
+        model = torch.load(saved_model_path, weights_only=False)
+    
+        for param in model.parameters():
+            param.requires_grad = False
+    
+        # Final three CNBlocks
+        for param in model.features[-1].parameters():
+            param.requires_grad = True
+    
+        # Final LayerNorm
+        for param in model.classifier[0].parameters():
+            param.requires_grad = True
+    
+        # Final Linear layer
+        for param in model.classifier[2].parameters():
+            param.requires_grad = True
+        
+    return model
+        
