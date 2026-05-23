@@ -36,6 +36,8 @@ def main():
         --val           (str) Path to the validation dataset root.
         --test          (str) Path to the test dataset root.
         --model-name    (str) Name of the model architecture to initialize.
+                          Must be one of: "convnext_zero_shot", "convnext_transformer", 
+                          or "convnext_fine_tuned_final_stage" (will raise a ValueError otherwise).
                               Default: "convnext_fine_tuned_final_stage".
         --model-path    (str, optional) Path to a pre-trained model `.pth` file 
                               to load weights from. Required unless the chosen model name
