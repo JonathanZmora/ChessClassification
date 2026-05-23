@@ -18,6 +18,37 @@ from models.models import init_model, ConvTransformer
 
 
 def main():
+    """
+    Chess Board Classification Training and Evaluation Script.
+    
+    Usage:
+        python trainer.py --train <train_dir> --val <val_dir> --test <test_dir> \
+                          --model-name <name> --save-path <save_path> [options]
+    
+    Example:
+        python trainer.py --train data/train/synthetic --val data/validation/synthetic \
+                          --test data/test/real --model-name convnext_transformer \
+                          --model-path models/convnext_transformer.pth \
+                          --save-path trained_model.pth --epochs 2 --lr 0.0001 --scheduler
+    
+    Command Line Arguments:
+        --train         (str) Path to the training dataset root.
+        --val           (str) Path to the validation dataset root.
+        --test          (str) Path to the test dataset root.
+        --model-name    (str) Name of the model architecture to initialize.
+                              Default: "convnext_fine_tuned_final_stage".
+        --model-path    (str, optional) Path to a pre-trained model `.pth` file 
+                              to load weights from. Required unless the chosen model name
+                              is 'convnext_zero_shot'.
+        --save-path     (str) Filepath where the trained model weights will be saved.
+        --lr            (float) Initial learning rate for the Adam optimizer. Default: 0.001.
+        --epochs        (int) Number of complete passes through the training dataset. Default: 15.
+        --batch         (int) Number of samples per batch. Default: 2.
+        --padding       (float, optional) Crop padding value applied to the dataset images. Default: 1.0.
+        --scheduler     (flag) Include this flag to enable a CosineAnnealingLR 
+                              scheduler during training.
+    """
+    
     parser = argparse.ArgumentParser()
     parser.add_argument("--train", required=True, help="path to training dataset root (e.g. data/train/synthetic)")
     parser.add_argument("--val", required=True, help="path to validation dataset root (e.g. data/validation/synthetic)")
