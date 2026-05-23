@@ -142,7 +142,7 @@ import os
 os.environ["PATH_TO_MODEL"] = "/path/to/model.pth"
 ```
 
-or via shell - here are examples for common shell environments on Windows and Linux,
+or via shell - here are few examples for common shell environments, both on Windows and Linux,
 
 **Windows CMD**:
 ```shell
