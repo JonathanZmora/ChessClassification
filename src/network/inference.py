@@ -18,6 +18,9 @@ def predict_board(image: np.ndarray) -> torch.Tensor:
             this is done like that, because project's requirements explicitly asked for `predict_board()`
             receive only an image as an argument.
 
+        * Project's models could be found here:
+            https://drive.google.com/drive/folders/1nLEzm4LjWIXToCoKd1IA6LpzQ0f2tguT?usp=drive_link
+
     Returns:
         torch.Tensor: a 8x8 int64 torch tensor, that classifies every cell in the original chessboard image
     """
