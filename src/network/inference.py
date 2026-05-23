@@ -22,6 +22,9 @@ def predict_board(image: np.ndarray) -> torch.Tensor:
         * Project's models could be found here:
             https://drive.google.com/drive/folders/1nLEzm4LjWIXToCoKd1IA6LpzQ0f2tguT?usp=drive_link
 
+    Raises:
+        ValueError - if PATH_TO_MODEL env is not set
+
     Returns:
         torch.Tensor: a 8x8 int64 torch tensor, that classifies every cell in the original chessboard image
     """
