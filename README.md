@@ -181,10 +181,12 @@ board_prediction: torch.Tensor = predict_board(my_chessboard_image)
 
 #### End-User
 
-It is possible to run image predictions using our [web app](https://jonathanzmora.github.io/ChessClassification/app.html)
+It is possible to run image predictions using our
+[web app](https://jonathanzmora.github.io/ChessClassification/app.html).
 
-First of all, press `Ping Backend` to ensure the BE VM is up and working, then you can press `Test me!` to use 
-a random sampled image from a small dataset, or press `Choose image` then `Classify board` to upload image of your own. 
+First of all, press `Ping Backend` to ensure the BE virtual machine is up and working,
+then you can press `Test me!` to use a random sampled image from a small dataset,
+or press `Choose image` and then `Classify board` to upload and predict image of your own. 
 
 ## Technical: Dataset, Approach and Results
 
