@@ -159,7 +159,7 @@ $env:PATH_TO_MODEL = "/path/to/model.pth"
 export PATH_TO_MODEL="/path/to/model.pth"
 ```
 
-Only after exporting such environment variable, you can proceed and import the method and use it.
+_Only after exporting such environment variable_, you can proceed and import the method and use it.
 See this E2E example for using our SDK:
 ```python
 import os
