@@ -223,3 +223,6 @@ If you use this repository in academic research, please cite:
   url          = {https://github.com/JonathanZmora/ChessClassification}
 }
 ```
+
+If this work contributes to your academic research, we kindly request that you cite it.
+Citation helps support our academic development and acknowledges the effort invested in this project!
