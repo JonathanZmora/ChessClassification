@@ -9,10 +9,20 @@ from tqdm import tqdm
 def predict_board(image: np.ndarray) -> torch.Tensor:
     """
     Predict the chessboard state from a single RGB image.
-    Output: (8, 8) int64 torch tensor.
+
+    Parameters:
+        image (np.ndarray): an array that represents a chessboard image
+
+    Notes:
+        * Please note that to use this function, you should manually update the path at the `model`
+            this is done like that, because project's requirements explicitly asked for `predict_board()`
+            receive only an image as an argument.
+
+    Returns:
+        torch.Tensor: a 8x8 int64 torch tensor, that classifies every cell in the original chessboard image
     """
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = torch.load("convnext_fine_tuned_final_stage.pth", map_location=device, weights_only=False)
+    model = torch.load("path/to/model.pth", map_location=device, weights_only=False)
 
     infer_transform = transforms.Compose([
         transforms.ToPILImage(),
