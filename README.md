@@ -135,8 +135,6 @@ The project should now be ready to use.
 
 For a more detailed discussion, please refer to: [Project's academic web-page](https://jonathanzmora.github.io/ChessClassification/)
 
-Our final model achieved 97.3% accuracy on the real-world test dataset.
-
 ## Skills
 
 This project demonstrates practical work in:
