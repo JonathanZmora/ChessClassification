@@ -129,6 +129,8 @@ The project should now be ready to use.
 
 ## Usage
 
+Here we'll discuss the overall usage of the project: retrain and infer.
+
 ### Train
 
 ### Inference
