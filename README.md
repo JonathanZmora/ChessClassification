@@ -135,6 +135,12 @@ Here we'll discuss the overall usage of the project: retrain and infer.
 
 ### Inference
 
+Here we'll show a few ways of running inference on one of our pre-ready models, which are discussed in the article,
+they could be found [here](https://drive.google.com/drive/u/0/folders/1nLEzm4LjWIXToCoKd1IA6LpzQ0f2tguT).
+
+The idea is we show 2 ways of running the predictions, the one is for develops, so you could integrate our models into
+your own code base/architecture and the second is if you only want to use our strongest model. 
+
 #### Developer
 
 After the project is successfully cloned and installed (see [Prerequisites](#Prerequisites) and [Installation](#installation)),
