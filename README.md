@@ -106,6 +106,8 @@ using our strongest model.
 
 ![img.png](docs/static/images/img.png)
 
+Read more about our the web app usage, at [Inference](#inference). 
+
 ## Prerequisites
 
 Before installing and running this project, ensure that the following are installed on your system:
