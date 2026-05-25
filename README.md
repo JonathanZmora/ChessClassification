@@ -68,6 +68,44 @@ and a series of experiments analyzing how synthetic training data can improve re
 Overall, the project develops and studies a complete pipeline for chessboard state recognition
 using ResNet18 and ConvNeXt models.
 
+## Project Data Sources
+
+[This](https://github.com/JonathanZmora/ChessClassification) is the main project's repository! But in addition to this,
+the project utilizes a few more repositories to construct it all.
+
+### Google Drive
+
+All Project's static data sources are found in ours academic
+[Google Drive](https://drive.google.com/drive/u/0/folders/1JJbqjPhAtJAhZVrHCIJQ19dPz8wSFkLP).
+There you could find 3 main building block of our research and project:
+
+* Naive data - at `naive_synthetic_data/`, which is the synthetic data that has been generated using our
+data generation pipeline: those are fully ideal black-and-white synthetic images,
+with perfect lighting and sharp resolution. 
+
+* Quality data - at `quality_synthetic_data/`, which is the naive data, _but with further processing_:
+improved resolution, coloring, padding, adding noise - which here to reduce the gap between the synthetic dataset and
+the real-world dataset.
+
+**all data that is found on the Google Drive, is divided into 3: validation, train and test.
+And, is compressed into a `zip` format.**
+
+* Pre Trained Models - at `models/`, there you could find all the models we've created during our performance research,
+all of them are available there.
+
+### HuggingFace
+
+GitHub pages, allows to deploy only static pages, but to deploy our web app, we would need a more dynamic service,
+that enable code running. For this, we chose a service called
+[HuggingFace](https://huggingface.co/spaces/liorvi35/chess-api/tree/main), which conceptually is a service that allows
+to deploy codebase same as, for example, GitHub. But furthermore, it also allows to deploy a Virtual Machine, of that
+repository via Docker deployment. 
+
+So, to enable our web app, we are holding a VM on HuggingFace that would receive requests of images, and run predictions
+using our strongest model.
+
+![img.png](docs/static/images/img.png)
+
 ## Prerequisites
 
 Before installing and running this project, ensure that the following are installed on your system:
