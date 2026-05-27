@@ -53,60 +53,35 @@ Given a single input image, the model identifies the content of the board and re
 position in FEN format.
 
 A central challenge in this task is the significant gap between the synthetic training data and the real test data.
-By nature, the synthetic images are highly controlled: they are black and white, idealized, noiseless, and lack many
-of the visual characteristics found in real photographs, such as color variation, lighting changes, blur, shadows,
-and background clutter.
-
-To address this challenge, the project relies on large scale synthetic data generation to produce labeled training
-examples in a setting where real annotated data is limited and expensive to obtain. We then examine how effectively
-models trained on synthetic data transfer to real world photographs, and how different training and evaluation choices
-influence that transfer.
+To address this challenge, the project relies on large scale synthetic data generation and examines how well
+models trained on synthetic data transfer to real world photographs.
 
 The project includes data preparation scripts, model training, evaluation on both synthetic and real images,
-and a series of experiments analyzing how synthetic training data can improve real world chessboard recognition.
+and experiments with ResNet18, ConvNeXt, Transformer-based board context, and an ILP solver that enforces
+valid chessboard constraints during inference.
 
-Overall, the project develops and studies a complete pipeline for chessboard state recognition
-using ResNet18 and ConvNeXt models.
+Overall, the project develops and studies a complete pipeline for chessboard state recognition from physical
+chessboard images.
 
-## Project Data Sources
-
-[This](https://github.com/JonathanZmora/ChessClassification) is the main project's repository! But in addition to this,
-the project utilizes a few more repositories to construct it all.
-
-### Google Drive
+## Google Drive
 
 All Project's static data sources are found in ours academic
 [Google Drive](https://drive.google.com/drive/u/0/folders/1JJbqjPhAtJAhZVrHCIJQ19dPz8wSFkLP).
 There you could find 3 main building block of our research and project:
 
-* Naive data - at `naive_synthetic_data/`, which is the synthetic data that has been generated using our
-data generation pipeline: those are fully ideal black-and-white synthetic images,
-with perfect lighting and sharp resolution. 
+* Naive data - at `naive_synthetic_data/`, which is the synthetic data that has been generated using the original
+Blender script, we've received: those are fully ideal black-and-white synthetic images, with perfect lighting and
+sharp resolution. 
 
-* Quality data - at `quality_synthetic_data/`, which is the naive data, _but with further processing_:
-improved resolution, coloring, padding, adding noise - which here to reduce the gap between the synthetic dataset and
-the real-world dataset.
+* Quality data - at `quality_synthetic_data/`, which is synthetic data that has been generated via our improved
+generation pipeline: improved resolution, coloring, padding, adding noise - which here to reduce the gap between
+the synthetic dataset and the real-world dataset.
 
 **all data that is found on the Google Drive, is divided into 3: validation, train and test.
 And, is compressed into a `zip` format.**
 
 * Pre Trained Models - at `models/`, there you could find all the models we've created during our performance research,
 all of them are available there.
-
-### HuggingFace
-
-GitHub pages, allows to deploy only static pages, but to deploy our web app, we would need a more dynamic service,
-that enable code running. For this, we chose a service called
-[HuggingFace](https://huggingface.co/spaces/liorvi35/chess-api/tree/main), which conceptually is a service that allows
-to deploy codebase same as, for example, GitHub. But furthermore, it also allows to deploy a Virtual Machine, of that
-repository via Docker deployment. 
-
-So, to enable our web app, we are holding a VM on HuggingFace that would receive requests of images, and run predictions
-using our strongest model.
-
-![img.png](docs/static/images/img.png)
-
-Read more about our the web app usage, at [Inference](#inference). 
 
 ## Prerequisites
 
@@ -172,6 +147,8 @@ The project should now be ready to use.
 Here we'll discuss the overall usage of the project: retrain and infer.
 
 ### Train
+
+
 
 ### Inference
 
