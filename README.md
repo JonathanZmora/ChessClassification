@@ -153,7 +153,37 @@ validation, test and dumps a new model of same architecture that is trained over
 
 **The script is found in the root directory of this repository**
 
+_Important Note_:
 
+Every model requires a setup of its own - which requires a script support and maintenance, this why this script allows
+to re-train only the models that we thought of it being interesting to retreain them on another data, which are the
+following:
+
+1. convnext_zero_shot
+2. convnext_transformer 
+3. convnext_fine_tuned_final_stage
+
+**available flags**:
+
+* `--train` - path to a directory with the train dataset
+* `--val` - path to a directory with the validation dataset 
+* `--test` - path to a directory with the test dataset
+* `--model-name` - one of: "convnext_zero_shot", "convnext_transformer", "convnext_fine_tuned_final_stage"
+* `--model-path` - path to the `pth` model file
+* `--save-path` - destination path, where save the new re-treined model
+* `--lr` - learning rate
+* `--epochs` - amount of train epochs
+* `--batch` - amount of samples per batch
+* `--padding` - crop padding for each cell in the board
+* `--schedualer` - enable a CosineAnnealingLR scheduler during training
+
+Here is an example running the training script, this example could be used directly on a Linux shell environment:
+
+```shell
+python trainer.py --train=data/train/synthetic --val=data/validation/synthetic \ 
+  --test=data/test/real --model-name=convnext_transformer --model-path=models/convnext_transformer.pth \
+  --save-path=trained_model.pth --epochs=2 --lr=0.0001 --scheduler
+```
 
 ### Inference
 
