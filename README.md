@@ -148,6 +148,11 @@ Here we'll discuss the overall usage of the project: retrain and infer.
 
 ### Train
 
+To train our models, we created a script `trainer.py` which is a simple command-line tool, that does a setup, train,
+validation, test and dumps a new model of same architecture that is trained over custom datasets.
+
+**The script is found in the root directory of this repository**
+
 
 
 ### Inference
@@ -156,7 +161,7 @@ Here we'll show a few ways of running inference on one of our pre-ready models, 
 they could be found [here](https://drive.google.com/drive/u/0/folders/1nLEzm4LjWIXToCoKd1IA6LpzQ0f2tguT).
 
 The idea is we show 2 ways of running the predictions, the one is for develops, so you could integrate our models into
-your own code base/architecture and the second is if you only want to use our strongest model. 
+your own code base/architecture and the second is if you only want to use our strongest model.
 
 #### Developer
 
