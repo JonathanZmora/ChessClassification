@@ -157,7 +157,7 @@ def init_model(model_name, saved_model_path):
         raise ValueError("model name not in allowed names list")
 
     if "transformer" in model_name:
-        model = torch.load(saved_model_path, weights_only=False)
+        model = ConvTransformer(saved_model_path)
 
     else:
         model = torch.load(saved_model_path, weights_only=False)
