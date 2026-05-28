@@ -16,14 +16,13 @@ from src.utils.plotting import plot_training_history
 from models.models import init_model, ConvTransformer
 
 
-
 def main():
     """
     Chess Board Classification Training and Evaluation Script.
     
     Usage:
         python trainer.py --train <train_dir> --val <val_dir> --test <test_dir> \
-                          --model-name <name> --save-path <save_path> [options]
+                          --model-name <name> --model-path --save-path <save_path> [options]
     
     Example:
         python trainer.py --train data/train/synthetic --val data/validation/synthetic \
@@ -36,27 +35,23 @@ def main():
         --val           (str) Path to the validation dataset root.
         --test          (str) Path to the test dataset root.
         --model-name    (str) Name of the model architecture to initialize.
-                          Must be one of: "convnext_zero_shot", "convnext_transformer", 
-                          or "convnext_fine_tuned_final_stage" (will raise a ValueError otherwise).
-                              Default: "convnext_fine_tuned_final_stage".
-        --model-path    (str, optional) Path to a pre-trained model `.pth` file 
-                              to load weights from. Required unless the chosen model name
-                              is 'convnext_zero_shot'.
+                              Must be one of: "convnext_transformer" or "convnext_fine_tuned_final_stage"
+                              (will raise a ValueError otherwise). Default: "convnext_fine_tuned_final_stage".
+        --model-path    (str) Path to a pre-trained model `.pth` file to load weights from.
         --save-path     (str) Filepath where the trained model weights will be saved.
-        --lr            (float) Initial learning rate for the Adam optimizer. Default: 0.001.
-        --epochs        (int) Number of complete passes through the training dataset. Default: 15.
-        --batch         (int) Number of samples per batch. Default: 2.
+        --lr            (float, optional) Initial learning rate for the Adam optimizer. Default: 0.001.
+        --epochs        (int, optional) Number of complete passes through the training dataset. Default: 15.
+        --batch         (int, optional) Number of samples per batch. Default: 2.
         --padding       (float, optional) Crop padding value applied to the dataset images. Default: 1.0.
-        --scheduler     (flag) Include this flag to enable a CosineAnnealingLR 
-                              scheduler during training.
+        --scheduler     (flag) Include this flag to enable a CosineAnnealingLR scheduler during training.
     """
     
     parser = argparse.ArgumentParser()
     parser.add_argument("--train", required=True, help="path to training dataset root (e.g. data/train/synthetic)")
     parser.add_argument("--val", required=True, help="path to validation dataset root (e.g. data/validation/synthetic)")
     parser.add_argument("--test", required=True, help="path to test dataset root (e.g. data/test/real)")
-    parser.add_argument("--model-name", required=False, default="convnext_fine_tuned_final_stage", help="the chosen model name from the allowed model list")
-    parser.add_argument("--model-path", required=False, help="path to saved model pth file (e.g. convnext_transformer.pth)")
+    parser.add_argument("--model-name", required=True, help="the chosen model name from the allowed model list")
+    parser.add_argument("--model-path", required=True, help="path to saved model pth file (e.g. convnext_transformer.pth)")
     parser.add_argument("--save-path", required=True, help="path to save the trained model (e.g. trained_model.pth)")
     parser.add_argument("--lr", required=False, type=float, default=0.001, help="initial learning rate")
     parser.add_argument("--epochs", required=False, type=int, default=15, help="number of epochs")
@@ -64,9 +59,6 @@ def main():
     parser.add_argument("--padding", required=False, type=float, default=1.0, help="crop padding value")
     parser.add_argument("--scheduler", action="store_true", help="use a learning rate scheduler")
     args = parser.parse_args()
-
-    if "zero_shot" not in args.model_name and not args.model_path:
-        raise ValueError("Missing input argument: path to saved model pth file") 
 
     NUM_WORKERS = 4
     SIZE = 112

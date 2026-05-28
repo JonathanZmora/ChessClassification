@@ -1,10 +1,17 @@
 import os
+import sys
 import cv2
 import torch
 import pulp
 import numpy as np
 from torchvision import transforms
 from tqdm import tqdm
+
+project_root = os.path.abspath(os.path.join(os.getcwd(), "../.."))
+if project_root not in sys.path:
+    sys.path.append(project_root)
+
+from models.models import ConvTransformer
 
 
 def predict_board(image: np.ndarray) -> torch.Tensor:
@@ -19,7 +26,7 @@ def predict_board(image: np.ndarray) -> torch.Tensor:
             variable which is called "PATH_TO_MODEL". This is done like that, because project's requirements
             explicitly asked for `predict_board()` to receive only an image as a single argument.
 
-        * Project's models could be found here:
+        * Project's models can be found here:
             https://drive.google.com/drive/folders/1nLEzm4LjWIXToCoKd1IA6LpzQ0f2tguT?usp=drive_link
 
     Raises:
