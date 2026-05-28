@@ -163,7 +163,7 @@ In order to re-create our exact experiment configurations, here are the full com
 
 	python trainer.py --train data/train/synthetic --val data/validation/synthetic \
                       --test data/test/real --model-name convnext_transformer \
-                      --model-path models/convnext_transformer.pth \
+                      --model-path models/convnext_zero_shot.pth \
                       --save-path models/trained_model.pth --epochs 2 \
 					  --lr 0.0001 --scheduler
 
@@ -177,11 +177,13 @@ In order to re-create our exact experiment configurations, here are the full com
 
 **The script resides in the root directory of this repository**
 
-_Important Note_:
+_Important Notes_:
 
-You are only allowed to re-train our best performing zero-shot model and our best performing fine-tuned model,
+1. You are only allowed to re-train our best performing zero-shot model and our best performing fine-tuned model,
 which are named  "convnext_transformer" and "convnext_fine_tuned_final_stage" respectively.
-These are the only names that the script allows as --model-name parameter values.
+These are the only names that the script allows as --model-name argument values.
+2. Note that in order to re-train our best performing zero-shot model, the model weights file path passed to the \
+script should be the `convnext_zero_shot.pth` file found in google drive models directory.
 
 ### Inference
 
