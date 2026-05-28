@@ -25,12 +25,12 @@ This project was completed by:
 - [Jonathan Zmora](https://github.com/JonathanZmora)
 - [Lior Vinman](https://github.com/liorvi35)
 
-We are first-year M.Sc. students in the Department of Computer and Information Science at
+We are first-year M.Sc. students in the Stein faculty of Computer and Information Science at
 [Ben Gurion University](https://www.bgu.ac.il/en/).
 
-## Introduction
+## Project Overview
 
-This repository presents our Final Project for the Introduction to Deep Learning course at Ben Gurion University.
+This repository presents our final project for the Introduction to Deep Learning course, taught by [Prof. Oren Freifeld](https://www.cs.bgu.ac.il/~orenfr/index.htm) and Mr. Roy Amoyal.
 
 The project focuses on recovering the full state of a chess game from a single RGB image of a physical chessboard,
 namely, a real-world image captured during an actual game between two players.
@@ -40,48 +40,55 @@ configuration, and represent it in [FEN](https://en.wikipedia.org/wiki/Forsyth%E
 format, which uniquely describes a given board state.
 
 Because labeled real-world data is both limited and costly to collect, clean, and annotate,
-this project explores the use of mostly [synthetic data](https://en.wikipedia.org/wiki/Synthetic_data)
-generated through a digital rendering pipeline, together with learning strategies designed to
-improve generalization from synthetic images to real photographs.
-
-The course is taught by [Prof. Oren Freifeld](https://www.cs.bgu.ac.il/~orenfr/index.htm), with the course TA, Mr. Roy Amoyal.
-
-## Project Overview
-
-The goal of this project is to recover the full state of a chess game from an image of a physical chessboard.
-Given a single input image, the model identifies the content of the board and reconstructs the corresponding
-position in FEN format.
+this project explores the use of mostly synthetic data generated through a digital rendering
+pipeline, together with learning strategies designed to improve generalization from synthetic 
+images to real photographs.
 
 A central challenge in this task is the significant gap between the synthetic training data and the real test data.
-To address this challenge, the project relies on large scale synthetic data generation and examines how well
+To address this challenge, the project relies on quality synthetic data generation and examines how well
 models trained on synthetic data transfer to real world photographs.
 
-The project includes data preparation scripts, model training, evaluation on both synthetic and real images,
-and experiments with ResNet18, ConvNeXt, Transformer-based board context, and an ILP solver that enforces
-valid chessboard constraints during inference.
+The project includes data generation and pre-processing, model training and evaluation, 
+experiments with different neural network architectures, and an Integer Linear Programming
+solver that enforces valid chessboard constraints during inference.
+All models were traing using the PyTorch framework. 
 
 Overall, the project develops and studies a complete pipeline for chessboard state recognition from physical
 chessboard images.
+
+For a more detailed discussion, please refer to: [Project's academic web-page](https://jonathanzmora.github.io/ChessClassification/)
 
 ## Google Drive
 
 All Project's static data sources are found in ours academic
 [Google Drive](https://drive.google.com/drive/u/0/folders/1JJbqjPhAtJAhZVrHCIJQ19dPz8wSFkLP).
-There you could find 3 main building block of our research and project:
+There you could find all of the data we used for training, validation, and testing, as well as 
+the weights for all of the models we trained during our experiments.
+Access to the different contents is as follows:
 
-* Naive data - at `naive_synthetic_data/`, which is the synthetic data that has been generated using the original
-Blender script, we've received: those are fully ideal black-and-white synthetic images, with perfect lighting and
-sharp resolution. 
+* models/ - This directory contains `.pth` files with weights for all the models we've trained during our experiments.
 
-* Quality data - at `quality_synthetic_data/`, which is synthetic data that has been generated via our improved
-generation pipeline: improved resolution, coloring, padding, adding noise - which here to reduce the gap between
-the synthetic dataset and the real-world dataset.
+* naive_synthetic_data/ - This directory contains the synthetic data that we generated using the original
+Blender generation script we received with the project insturctions.
+Those are ideal black-and-white synthetic images which we used for our first baseline experiments.
 
-**all data that is found on the Google Drive, is divided into 3: validation, train and test.
-And, is compressed into a `zip` format.**
+* quality_synthetic_data/ - This directory contains the synthetic data that we generated using our improved
+custom generation pipeline.
 
-* Pre Trained Models - at `models/`, there you could find all the models we've created during our performance research,
-all of them are available there.
+* Inside each of the above directories, you will find train, validation, and test directories, each containing
+  the data for the respective split. The data itself is compressed into a `zip` format inside the dataset.zip file.
+  To access the data, you must download the file and unzip it. All datasets are organized as follows:
+
+  dataset/
+  
+  	└─ images/
+
+  	└─ gt.csv
+
+	The gt.csv file contains 3 columns (and more for synthetic data):
+	1. image_name
+	2. FEN string corresponding to the image
+	3. View specification (black/white)
 
 ## Prerequisites
 
@@ -144,59 +151,46 @@ The project should now be ready to use.
 
 ## Usage
 
-Here we'll discuss the overall usage of the project: retrain and infer.
-
 ### Train
 
-To train our models, we created a script `trainer.py` which is a simple command-line tool, that does a setup, train,
-validation, test and dumps a new model of same architecture that is trained over custom datasets.
+To train our best performing zero-shot and fine-tuned models, we created a `trainer.py` script, which is a simple command-line tool
+that takes care of the data setup, model initialization, training and evaluation both with and without using the ILP solver.
+The new trained model will be saved at a path of your choosing.
+Full usage explanation can be found in the DocString inside the `trainer.py` file.
+In order to re-create our exact experiment configurations, here are the full commands you should use (swapping only the paths to the correct ones):
 
-**The script is found in the root directory of this repository**
+* For our best performing zero-shot model:
+
+	python trainer.py --train data/train/synthetic --val data/validation/synthetic \
+                      --test data/test/real --model-name convnext_transformer \
+                      --model-path models/convnext_transformer.pth \
+                      --save-path models/trained_model.pth --epochs 2 \
+					  --lr 0.0001 --scheduler
+
+* For our best performing fine-tuned model:
+
+	python trainer.py --train data/train/synthetic --val data/validation/synthetic \
+                      --test data/test/real --model-name convnext_fine_tuned_final_stage \
+                      --model-path models/convnext_fine_tuned_final_stage.pth \
+                      --save-path models/trained_model.pth --epochs 15 \
+					  --lr 0.001 --scheduler
+
+**The script resides in the root directory of this repository**
 
 _Important Note_:
 
-Every model requires a setup of its own - which requires a script support and maintenance, this why this script allows
-to re-train only the models that we thought of it being interesting to retreain them on another data, which are the
-following:
-
-1. convnext_zero_shot
-2. convnext_transformer 
-3. convnext_fine_tuned_final_stage
-
-**available flags**:
-
-* `--train` - path to a directory with the train dataset
-* `--val` - path to a directory with the validation dataset 
-* `--test` - path to a directory with the test dataset
-* `--model-name` - one of: "convnext_zero_shot", "convnext_transformer", "convnext_fine_tuned_final_stage"
-* `--model-path` - path to the `pth` model file
-* `--save-path` - destination path, where save the new re-treined model
-* `--lr` - learning rate
-* `--epochs` - amount of train epochs
-* `--batch` - amount of samples per batch
-* `--padding` - crop padding for each cell in the board
-* `--schedualer` - enable a CosineAnnealingLR scheduler during training
-
-Here is an example running the training script, this example could be used directly on a Linux shell environment:
-
-```shell
-python trainer.py --train=data/train/synthetic --val=data/validation/synthetic \ 
-  --test=data/test/real --model-name=convnext_transformer --model-path=models/convnext_transformer.pth \
-  --save-path=trained_model.pth --epochs=2 --lr=0.0001 --scheduler
-```
+You are only allowed to re-train our best performing zero-shot model and our best performing fine-tuned model,
+which are named  "convnext_transformer" and "convnext_fine_tuned_final_stage" respectively.
+These are the only names that the script allows as --model-name parameter values.
 
 ### Inference
 
-Here we'll show a few ways of running inference on one of our pre-ready models, which are discussed in the article,
-they could be found [here](https://drive.google.com/drive/u/0/folders/1nLEzm4LjWIXToCoKd1IA6LpzQ0f2tguT).
-
-The idea is we show 2 ways of running the predictions, the one is for develops, so you could integrate our models into
-your own code base/architecture and the second is if you only want to use our strongest model.
+Here we'll show 2 methods of running inference on one of our trained models, which are discussed in the article.
 
 #### Developer
 
 After the project is successfully cloned and installed (see [Prerequisites](#Prerequisites) and [Installation](#installation)),
-you may want to use the `predict_board()` function, which returns a prediction for a single chessboard picture.
+you may want to use the `predict_board()` function, which returns a prediction for a single chessboard image.
 
 Before using it, you need to set an env variable, with the model's path. This could be done via Python:
 ```python
@@ -246,13 +240,9 @@ board_prediction: torch.Tensor = predict_board(my_chessboard_image)
 It is possible to run image predictions using our
 [web app](https://jonathanzmora.github.io/ChessClassification/app.html).
 
-First of all, press `Ping Backend` to ensure the BE virtual machine is up and working,
+First of all, press `Ping Backend` to ensure the virtual machine is up and working,
 then you can press `Test me!` to use a random sampled image from a small dataset,
-or press `Choose image` and then `Classify board` to upload and predict image of your own. 
-
-## Technical: Dataset, Approach and Results
-
-For a more detailed discussion, please refer to: [Project's academic web-page](https://jonathanzmora.github.io/ChessClassification/)
+or press `Choose image` and then `Classify Board` to upload and classify an image of your own. 
 
 ## Skills
 
