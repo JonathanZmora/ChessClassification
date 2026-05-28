@@ -5,7 +5,6 @@ Synthetic-to-Real Generalization for Chessboard square and board-state Classific
 ## Table of Contents
 
 - [Collaborators](#collaborators)
-- [Introduction](#introduction)
 - [Project Overview](#project-overview)
 - [Prerequisites](#prerequisites)
 - [Installation](#installation)
@@ -14,7 +13,6 @@ Synthetic-to-Real Generalization for Chessboard square and board-state Classific
   - [Inference](#inference)
     - [Developer](#developer)
     - [End User](#end-user)
-- [Technical](#technical-dataset-approach-and-results)
 - [Skills](#skills)
 - [Academic Citation](#academic-citation)
 
@@ -147,6 +145,15 @@ pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
+_Important Note_:
+
+Because PyTorch depends on your specific hardware (CPU, Mac, or specific NVIDIA GPUs), 
+please visit the [Official PyTorch Get Started Page](https://pytorch.org/get-started/locally/)
+and install the version appropriate for your system if you need to.
+A specific torch and torchvision version is not specified in the requirements.txt file.
+For example, for NVIDIA GeForce GTX 1080 Ti GPU you can use: \
+pip install torch torchvision --index-url https://download.pytorch.org/whl/cu118
+
 The project should now be ready to use.
 
 ## Usage
@@ -161,18 +168,18 @@ In order to re-create our exact experiment configurations, here are the full com
 
 * For our best performing zero-shot model:
 
-	python trainer.py --train data/train/synthetic --val data/validation/synthetic \
-                      --test data/test/real --model-name convnext_transformer \
-                      --model-path models/convnext_zero_shot.pth \
-                      --save-path models/trained_model.pth --epochs 2 \
+	python trainer.py --train data/train/synthetic --val data/validation/synthetic \ \
+                      --test data/test/real --model-name convnext_transformer \ \
+                      --model-path models/convnext_zero_shot.pth \ \
+                      --save-path models/trained_model.pth --epochs 2 \ \
 					  --lr 0.0001 --scheduler
 
 * For our best performing fine-tuned model:
 
-	python trainer.py --train data/train/synthetic --val data/validation/synthetic \
-                      --test data/test/real --model-name convnext_fine_tuned_final_stage \
-                      --model-path models/convnext_fine_tuned_final_stage.pth \
-                      --save-path models/trained_model.pth --epochs 15 \
+	python trainer.py --train data/train/synthetic --val data/validation/synthetic \ \
+                      --test data/test/real --model-name convnext_fine_tuned_final_stage \ \
+                      --model-path models/convnext_fine_tuned_final_stage.pth \ \
+                      --save-path models/trained_model.pth --epochs 15 \ \
 					  --lr 0.001 --scheduler
 
 **The script resides in the root directory of this repository**
