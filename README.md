@@ -171,21 +171,30 @@ In order to re-create our exact experiment configurations, here are the full com
 * For our best performing zero-shot model:
 
 	```bash
-	python trainer.py --train data/train/synthetic --val data/validation/synthetic \ 
-                      --test data/test/real --model-name convnext_transformer \ 
-                      --model-path models/convnext_zero_shot.pth \ 
-                      --save-path models/trained_model.pth --epochs 2 \ 
-					  --lr 0.0001 --scheduler
+	python trainer.py \
+ 	--train data/train/synthetic \
+ 	--val data/validation/synthetic \
+ 	--test data/test/real \
+ 	--model-name convnext_transformer \
+ 	--model-path models/convnext_zero_shot.pth \
+ 	--save-path models/trained_model.pth --epochs 2 \
+	--lr 0.0001 \
+ 	--scheduler
  	```
 
 * For our best performing fine-tuned model:
 
 	```bash
-	python trainer.py --train data/train/real --val data/validation/real \ 
-                      --test data/test/real --model-name convnext_fine_tuned_final_stage \ 
-                      --model-path models/convnext_zero_shot.pth \ 
-                      --save-path models/trained_model.pth --epochs 15 \ 
-					  --lr 0.001 --scheduler
+	python trainer.py \
+ 	--train data/train/real \
+ 	--val data/validation/real \
+ 	--test data/test/real \
+ 	--model-name convnext_fine_tuned_final_stage \
+ 	--model-path models/convnext_zero_shot.pth \
+ 	--save-path models/trained_model.pth \
+ 	--epochs 15 \
+	--lr 0.001 \
+ 	--scheduler
 	```
  
 **The script resides in the root directory of this repository**
