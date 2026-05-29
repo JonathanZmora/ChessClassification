@@ -238,7 +238,7 @@ from src.network.inference import predict_board
 os.environ["PATH_TO_MODEL"] = "/home/user/ChessClassification/models/model.pth"
 
 # getting an image, as numpy array
-image_path: str = "/home/user/ChessClassification/data/train/real/images/image.jpg"
+image_path: str = "/home/user/ChessClassification/data/test/real/images/image.jpg"
 my_chessboard_image: np.ndarray = cv2.imread(image_path)
 
 # making an inference of the image, via the configured model
