@@ -152,7 +152,7 @@ please visit the [Official PyTorch Get Started Page](https://pytorch.org/get-sta
 and install the version appropriate for your system if you need to.
 A specific torch and torchvision version is not specified in the requirements.txt file.
 For example, for NVIDIA GeForce GTX 1080 Ti GPU you can use: \
-pip install torch torchvision --index-url https://download.pytorch.org/whl/cu118
+```pip install torch torchvision --index-url https://download.pytorch.org/whl/cu118```
 
 The project should now be ready to use.
 
