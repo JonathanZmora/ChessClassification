@@ -228,17 +228,18 @@ _Only after exporting such environment variable_, you can proceed and import the
 See this E2E example for using our SDK:
 ```python
 import os
-
+import cv2
 import numpy as np
 import torch
 
 from src.network.inference import predict_board
 
 # setting a model path as env
-os.environ["PATH_TO_MODEL"] = "/home/user/Documents/model.pth"
+os.environ["PATH_TO_MODEL"] = "/home/user/ChessClassification/models/model.pth"
 
 # getting an image, as numpy array
-my_chessboard_image: np.ndarray = np.ndarray(...)
+image_path: str = "/home/user/ChessClassification/data/train/real/images/image.jpg"
+my_chessboard_image: np.ndarray = cv2.imread(image_path)
 
 # making an inference of the image, via the configured model
 board_prediction: torch.Tensor = predict_board(my_chessboard_image)
