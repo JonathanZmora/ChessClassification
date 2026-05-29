@@ -89,7 +89,7 @@ dataset/
 The gt.csv file contains 3 columns (and more for synthetic data):
 1. image_name - the image file name.
 2. fen - the FEN string corresponding to the image.
-3. view - the board view specification (black/white).
+3. view - the board point of view specification (black/white).
 
 ## Prerequisites
 
