@@ -176,7 +176,7 @@ In order to re-create our exact experiment configurations, here are the full com
 
 * For our best performing fine-tuned model:
 
-	python trainer.py --train data/train/synthetic --val data/validation/synthetic \ \
+	python trainer.py --train data/train/real --val data/validation/real \ \
                       --test data/test/real --model-name convnext_fine_tuned_final_stage \ \
                       --model-path models/convnext_zero_shot.pth \ \
                       --save-path models/trained_model.pth --epochs 15 \ \
