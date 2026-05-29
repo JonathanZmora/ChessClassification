@@ -175,9 +175,9 @@ In order to re-create our exact experiment configurations, here are the full com
 
 	```bash
 	python trainer.py \
- 	--train data/quality_synthetic_data/train \
- 	--val data/quality_synthetic_data/validation \
- 	--test data/real_data/test \
+ 	--train data/quality_synthetic_data/train/dataset \
+ 	--val data/quality_synthetic_data/validation/dataset \
+ 	--test data/real_data/test/dataset \
  	--model-name convnext_transformer \
  	--model-path models/convnext_zero_shot.pth \
  	--save-path models/trained_model.pth --epochs 2 \
