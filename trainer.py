@@ -25,10 +25,15 @@ def main():
                           --model-name <name> --model-path --save-path <save_path> [options]
     
     Example:
-        python trainer.py --train data/train/synthetic --val data/validation/synthetic \
-                          --test data/test/real --model-name convnext_transformer \
-                          --model-path models/convnext_transformer.pth \
-                          --save-path trained_model.pth --epochs 2 --lr 0.0001 --scheduler
+         python trainer.py \
+         --train data/quality_synthetic_data/train/dataset \
+         --val data/quality_synthetic_data/validation/dataset \
+         --test data/real_data/test/dataset \
+         --model-name convnext_transformer \
+         --model-path models/convnext_zero_shot.pth \
+         --save-path models/trained_model.pth --epochs 2 \
+         --lr 0.0001 \
+         --scheduler
     
     Command Line Arguments:
         --train         (str) Path to the training dataset root.
