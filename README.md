@@ -58,10 +58,11 @@ For a more detailed discussion, please refer to: [Project's academic web-page](h
 
 ## Google Drive
 
-All Project's static data sources can be found in our academic
+All Project's static data sources can be found in our project's
 [Google Drive](https://drive.google.com/drive/u/0/folders/1JJbqjPhAtJAhZVrHCIJQ19dPz8wSFkLP).
 There you could find all of the data we used for training, validation, and testing, as well as 
 the weights for all of the models we trained during our experiments.
+The drive is not open to the public - you will need to request access if you wish to use it.
 Access to the different contents is as follows:
 
 * models/ - This directory contains `.pth` files with weights for all the models we've trained during our experiments.
@@ -73,20 +74,22 @@ Those are ideal black-and-white synthetic images which we used for our first bas
 * quality_synthetic_data/ - This directory contains the synthetic data that we generated using our improved
 custom generation pipeline.
 
-* Inside each of the above directories, you will find train, validation, and test directories, each containing
-  the data for the respective split. The data itself is compressed into a `zip` format inside the dataset.zip file.
-  To access the data, you must download the file and unzip it. All datasets are organized as follows:
+* real_data/ - This directory contains the real-world datasets we used for fine-tuning and testing.
 
-  dataset/
+Inside each of the above data directories, you will find train, validation, and test directories, each containing
+the data for the respective split. The data itself is compressed into a `.zip` format inside a `dataset.zip` file.
+To access the data, you must download the file and unzip it. All datasets are organized as follows:
+
+dataset/
   
-  	└─ images/
+└─ images/
 
-  	└─ gt.csv
+└─ gt.csv
 
-	The gt.csv file contains 3 columns (and more for synthetic data):
-	1. image_name
-	2. FEN string corresponding to the image
-	3. View specification (black/white)
+The gt.csv file contains 3 columns (and more for synthetic data):
+1. image_name - the image file name.
+2. fen - the FEN string corresponding to the image.
+3. view - the view specification (black/white), meaning which piece color will be on the bottom side of the image.
 
 ## Prerequisites
 
@@ -172,9 +175,9 @@ In order to re-create our exact experiment configurations, here are the full com
 
 	```bash
 	python trainer.py \
- 	--train data/train/synthetic \
- 	--val data/validation/synthetic \
- 	--test data/test/real \
+ 	--train data/quality_synthetic_data/train \
+ 	--val data/quality_synthetic_data/validation \
+ 	--test data/real_data/test \
  	--model-name convnext_transformer \
  	--model-path models/convnext_zero_shot.pth \
  	--save-path models/trained_model.pth --epochs 2 \
@@ -186,9 +189,9 @@ In order to re-create our exact experiment configurations, here are the full com
 
 	```bash
 	python trainer.py \
- 	--train data/train/real \
- 	--val data/validation/real \
- 	--test data/test/real \
+ 	--train data/real_data/train/dataset \
+ 	--val data/real_data/validation/dataset \
+ 	--test data/real_data/test/dataset \
  	--model-name convnext_fine_tuned_final_stage \
  	--model-path models/convnext_zero_shot.pth \
  	--save-path models/trained_model.pth \
@@ -253,7 +256,7 @@ from src.network.inference import predict_board
 os.environ["PATH_TO_MODEL"] = "/home/user/ChessClassification/models/model.pth"
 
 # getting an image as numpy array
-image_path: str = "/home/user/ChessClassification/data/test/real/images/image.jpg"
+image_path: str = "/home/user/ChessClassification/data/real_data/test/dataset/images/image.jpg"
 my_chessboard_image: np.ndarray = cv2.imread(image_path)
 
 # making predictions on the image, via the configured model
