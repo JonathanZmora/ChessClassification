@@ -58,7 +58,7 @@ For a more detailed discussion, please refer to: [Project's academic web-page](h
 
 ## Google Drive
 
-All Project's static data sources are found in ours academic
+All Project's static data sources can be found in our academic
 [Google Drive](https://drive.google.com/drive/u/0/folders/1JJbqjPhAtJAhZVrHCIJQ19dPz8wSFkLP).
 There you could find all of the data we used for training, validation, and testing, as well as 
 the weights for all of the models we trained during our experiments.
